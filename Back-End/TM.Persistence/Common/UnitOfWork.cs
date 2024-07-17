@@ -28,6 +28,15 @@ namespace TM.Persistence.Common
             }
         }
 
+        private UserRepository UserRepository;
+        public IUserRepository UserRepo
+        {
+            get
+            {
+                return UserRepository ??= new(_context);
+            }
+        }
+
         public Task BeginTransactionAsync()
         {
             throw new NotImplementedException();

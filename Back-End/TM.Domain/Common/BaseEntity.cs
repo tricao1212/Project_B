@@ -7,10 +7,10 @@ namespace TM.Domain.Common
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public bool IsDeletable { get; set; } = false;
-        public DateTime CreateAt { get; set; } = DateTime.Now;
-        public DateTime UpdateAt { get; set; } = DateTime.Now;
-        public string CreateBy { get; set; } = string.Empty;
-        public string UpdateBy { get; set; } = string.Empty;
+        public bool IsDeletable { get; set; } = true;
+        public DateTime CreatedAt { get; set; } 
+        public DateTime UpdatedAt { get; set; } 
+        public string CreatedBy { get; set; } = string.Empty;
+        public string UpdatedBy { get; set; } = string.Empty;
     }
 }

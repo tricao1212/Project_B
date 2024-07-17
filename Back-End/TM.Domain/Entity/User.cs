@@ -7,7 +7,6 @@ namespace TM.Domain.Entity
     public class User : BaseEntity
     {
         [Required]
-        [EmailAddress]
         public string UserName { get; set; } = null!;
 
         [Required]
