@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TM.Domain.Entity;
 using TM.Domain.Repository_Interface;
 using TM.Persistence.Common;
@@ -15,5 +10,63 @@ namespace TM.Persistence.Repositories
         public TreeRepository(DbContext dbContext) : base(dbContext)
         {
         }
+        public override async Task<IEnumerable<Tree>> GetAllAsync()
+        {
+            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+                               .Include(x => x.Position)
+                               .Include(x => x.TypeTree)
+                               .AsNoTracking()
+                               .Where(x => x.IsDeleted == false)
+                               .ToListAsync();
+        }
+
+        public override async Task<IEnumerable<Tree>> FindAllAsync()
+        {
+            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+                               .Include(x => x.Position)
+                               .Include(x => x.TypeTree)
+                               .Where(x => x.IsDeleted == false)
+                               .ToListAsync();
+        }
+
+        public override async Task<Tree?> GetByIdAsync(string id)
+        {
+            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+                               .Include(x => x.Position)
+                               .Include(x => x.TypeTree)
+                               .AsNoTracking()
+                               .Where(x => x.IsDeleted == false)
+                               .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public override async Task<Tree?> FindByIdAsync(string id)
+        {
+            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+                               .Include(x => x.Position)
+                               .Include(x => x.TypeTree)
+                               .Where(x => x.IsDeleted == false)
+                               .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<string> GenerateUniqueTreeCode()
+        {
+            var lastTree = await _dbSet
+            .OrderByDescending(t => t.TreeCode)
+            .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (lastTree != null && lastTree.TreeCode.StartsWith("T"))
+            {
+                string numberPart = lastTree.TreeCode.Substring(1);
+                if (int.TryParse(numberPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            return $"T{nextNumber:D5}";
+        }
+
     }
 }

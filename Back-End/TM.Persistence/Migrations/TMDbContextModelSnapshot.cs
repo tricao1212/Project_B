@@ -27,9 +27,44 @@ namespace TM.Persistence.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Content")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TreeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TreeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Assignments");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.Position", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -38,12 +73,14 @@ namespace TM.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeletable")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("StaffId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<double>("Lat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("float");
 
                     b.Property<string>("TreeId")
                         .IsRequired()
@@ -58,11 +95,10 @@ namespace TM.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StaffId");
+                    b.HasIndex("TreeId")
+                        .IsUnique();
 
-                    b.HasIndex("TreeId");
-
-                    b.ToTable("Assignments");
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("TM.Domain.Entity.Tree", b =>
@@ -70,8 +106,8 @@ namespace TM.Persistence.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
+                    b.Property<double>("Age")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -84,23 +120,31 @@ namespace TM.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("Diameter")
+                        .HasColumnType("float");
+
                     b.Property<double>("Heigh")
                         .HasColumnType("float");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeletable")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Position")
+                    b.Property<int>("PlantYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TreeCode")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TypeTreeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -111,7 +155,47 @@ namespace TM.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TreeCode")
+                        .IsUnique()
+                        .HasFilter("[TreeCode] IS NOT NULL");
+
+                    b.HasIndex("TypeTreeId");
+
                     b.ToTable("Trees");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.TypeTree", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("TypeTrees");
                 });
 
             modelBuilder.Entity("TM.Domain.Entity.User", b =>
@@ -120,7 +204,6 @@ namespace TM.Persistence.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Avatar")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -130,14 +213,13 @@ namespace TM.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("Dob")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Dob")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeletable")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")
@@ -145,7 +227,6 @@ namespace TM.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Role")
@@ -160,35 +241,124 @@ namespace TM.Persistence.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TM.Domain.Entity.WorkContent", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AssignmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.ToTable("WorkContents");
+                });
+
             modelBuilder.Entity("TM.Domain.Entity.Assignment", b =>
                 {
-                    b.HasOne("TM.Domain.Entity.User", "Staff")
-                        .WithMany("Assignments")
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TM.Domain.Entity.Tree", "Tree")
                         .WithMany("Assignments")
                         .HasForeignKey("TreeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Staff");
+                    b.HasOne("TM.Domain.Entity.User", "User")
+                        .WithMany("Assignments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tree");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.Position", b =>
+                {
+                    b.HasOne("TM.Domain.Entity.Tree", "Tree")
+                        .WithOne("Position")
+                        .HasForeignKey("TM.Domain.Entity.Position", "TreeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Tree");
                 });
 
             modelBuilder.Entity("TM.Domain.Entity.Tree", b =>
                 {
+                    b.HasOne("TM.Domain.Entity.TypeTree", "TypeTree")
+                        .WithMany("ListTrees")
+                        .HasForeignKey("TypeTreeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TypeTree");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.WorkContent", b =>
+                {
+                    b.HasOne("TM.Domain.Entity.Assignment", "Assignment")
+                        .WithMany("WorkContent")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.Assignment", b =>
+                {
+                    b.Navigation("WorkContent");
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.Tree", b =>
+                {
                     b.Navigation("Assignments");
+
+                    b.Navigation("Position")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TM.Domain.Entity.TypeTree", b =>
+                {
+                    b.Navigation("ListTrees");
                 });
 
             modelBuilder.Entity("TM.Domain.Entity.User", b =>

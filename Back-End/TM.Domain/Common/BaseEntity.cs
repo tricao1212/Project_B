@@ -7,7 +7,7 @@ namespace TM.Domain.Common
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public bool IsDeletable { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; } 
         public DateTime UpdatedAt { get; set; } 
         public string CreatedBy { get; set; } = string.Empty;

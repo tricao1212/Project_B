@@ -10,7 +10,7 @@ using TM.Domain.Repository_Interface;
 
 namespace TM.Application.Common
 {
-    public class BaseService
+    public abstract class BaseService
     {
         protected readonly IUnitOfWork _unitOfWork;
         protected readonly IMapper _mapper;
@@ -26,9 +26,9 @@ namespace TM.Application.Common
             return new Result<T>
             {
                 StatusCode = HttpStatusCode.OK,
-                Data = data,
                 IsSuccess = true,
-                Message = "Successfully"
+                Message = "Successfully",
+                Data = data
             };
         }
 
@@ -37,8 +37,8 @@ namespace TM.Application.Common
             return new Result<T>
             {
                 StatusCode = HttpStatusCode.BadRequest,
-                Message = message,
-                IsSuccess = false
+                IsSuccess = false,
+                Message = message
             };
         }
 
@@ -47,8 +47,8 @@ namespace TM.Application.Common
             return new Result<T>
             {
                 StatusCode = HttpStatusCode.NotFound,
-                Message = message,
-                IsSuccess = false
+                IsSuccess = false,
+                Message = message
             };
         }
     }

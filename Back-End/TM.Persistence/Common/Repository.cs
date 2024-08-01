@@ -20,39 +20,53 @@ namespace TM.Persistence.Common
             _dbSet = dbContext.Set<T>();
         }
 
-        public async Task CreateAsync(T entity)
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            await _dbSet.AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
+            return await _dbSet.AsNoTracking()
+                               .ToListAsync();
         }
 
-        public async Task DeleteAsync(string id)
-        {
-            T entity = await GetByIdAsync(id);
-            _dbSet.Remove(entity);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> FindAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(string id)
+        public virtual async Task<T?> GetByIdAsync(string id)
+        {
+            return await _dbSet.AsNoTracking()
+                               .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public virtual async Task<T?> FindByIdAsync(string id)
         {
             return await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task SoftDeleteAsync(string id)
+        public async Task CreateAsync(params T[] entities)
         {
-            T entity = await GetByIdAsync(id);
-            entity.IsDeletable = true;
+            await _dbSet.AddRangeAsync(entities);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(T entity)
+        public async Task UpdateAsync(params T[] entities)
         {
-            _dbSet.Update(entity);
+            _dbSet.UpdateRange(entities);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(params T[] entities)
+        {
+            _dbSet.RemoveRange(entities);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task SoftDeleteAsync(params T[] entities)
+        {
+            foreach (var item in entities)
+            {
+                item.IsDeleted = true;
+            }
+            _dbSet.UpdateRange(entities);
             await _dbContext.SaveChangesAsync();
         }
     }

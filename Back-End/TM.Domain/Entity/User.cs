@@ -12,16 +12,17 @@ namespace TM.Domain.Entity
         [Required]
         public string Password { get; set; } = null!;
 
-        public string FullName { get; set; } = string.Empty;
+        public string? FullName { get; set; }
 
         [Phone]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone { get; set; }
 
-        public string Avatar { get; set; } = string.Empty;
+        public string? Avatar { get; set; }
 
-        public DateOnly Dob { get; set; }
+        public DateTime? Dob { get; set; }
 
-        public Role Role { get; set; } = Role.Staff;
+        [Required]
+        public Role Role { get; set; }
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
     }
 }

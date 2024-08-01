@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using TM.Domain.Enum;
 
 namespace TM.Domain.Dtos.Request.User
 {
     public class UpdateUserReq
     {
-        public string FullName { get; set; } = string.Empty;
+        [Required]
+        public string FullName { get; set; } = null!;
 
         [Phone]
-        public string Phone { get; set; } = string.Empty;
+        public string? Phone { get; set; }
 
-        public string Avatar { get; set; } = string.Empty;
+        public string? Avatar { get; set; }
 
-        public DateOnly Dob { get; set; }
+        public DateTime? Dob { get; set; }
+
+        [Required]
+        public Role Role { get; set; }
     }
 }

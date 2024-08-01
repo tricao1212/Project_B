@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TM.Domain.Common;
 using TM.Domain.Entity;
 
@@ -6,16 +8,65 @@ namespace TM.Persistence.Data
 {
     public class TMDbContext : DbContext
     {
-        public TMDbContext(DbContextOptions<TMDbContext> options) : base(options) { }
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public TMDbContext(DbContextOptions<TMDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Tree>()
+                .HasOne(t => t.Position)
+                .WithOne(p => p.Tree)
+                .HasForeignKey<Position>(p => p.TreeId);
+
+            modelBuilder.Entity<Tree>()
+               .HasIndex(t => t.TreeCode)
+               .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(t => t.UserName)
+                .IsUnique();
+
+            modelBuilder.Entity<TypeTree>()
+                .HasIndex(tt => tt.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Tree>()
+                .HasOne(t => t.TypeTree)
+                .WithMany(tt => tt.ListTrees)
+                .HasForeignKey(t => t.TypeTreeId);
+
+            modelBuilder.Entity<Assignment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Tree)
+                    .WithMany(t => t.Assignments)
+                    .HasForeignKey(e => e.TreeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.Assignments)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.WorkContent)
+                    .WithOne(u => u.Assignment)
+                    .HasForeignKey(u => u.AssignmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         public DbSet<Tree> Trees { get; set; }
         public DbSet<Assignment> Assignments { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<TypeTree> TypeTrees { get; set; }
+        public DbSet<Position> Positions { get; set; }
+        public DbSet<WorkContent> WorkContents { get; set; }
 
         public override int SaveChanges()
         {
@@ -39,8 +90,8 @@ namespace TM.Persistence.Data
             foreach (var entry in entries)
             {
                 var auditableEntity = (BaseEntity)entry.Entity;
-                var currentTime = DateTime.UtcNow;
-                var currentUser = "System"; 
+                var currentTime = DateTime.Now;
+                var currentUser = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.UserData)?.Value ?? "System";
                 if (entry.State == EntityState.Added)
                 {
                     auditableEntity.CreatedAt = currentTime;

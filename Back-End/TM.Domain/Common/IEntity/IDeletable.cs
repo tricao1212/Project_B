@@ -2,6 +2,6 @@
 {
     public interface IDeletable
     {
-        bool IsDeletable { get; set; }
+        bool IsDeleted { get; set; }
     }
 }

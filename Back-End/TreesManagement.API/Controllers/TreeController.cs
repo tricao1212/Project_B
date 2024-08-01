@@ -18,26 +18,67 @@ namespace TreesManagement.API.Controllers
         }
 
         [HttpGet]
-        [Route("All")]
-        public async Task<IActionResult> GetAllTrees()
+        [Route("GetAll")]
+        public async Task<IActionResult> GetAll()
         {
             var res = await _treeService.GetAll();
             return StatusCode((int)res.StatusCode, res);
         }
 
+        [HttpGet]
+        [Route("FindAll")]
+        public async Task<IActionResult> FindAll()
+        {
+            var res = await _treeService.FindAll();
+            return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpPost]
+        [Route("GetById")]
+        public async Task<IActionResult> GetById(string Id)
+        {
+            var res = await _treeService.GetById(Id);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpGet]
+        [Route("FindById")]
+        public async Task<IActionResult> FindById(string Id)
+        {
+            var res = await _treeService.FindById(Id);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
         [HttpPost]
         [Route("Add")]
-        public async Task<IActionResult> CreateTree([FromBody] CreateTreeReq tree)
+        public async Task<IActionResult> Create([FromForm] TreeReq tree, IFormFile image)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors)
-                                               .Select(e => e.ErrorMessage)
-                                               .ToList();
-                return BadRequest(new { Message = "Validation failed", Errors = errors });
-            }
-            var res = await _treeService.CreateAsync(tree);
+            var res = await _treeService.CreateAsync(tree,image);
             return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpPut]
+        [Route("Update")]
+        public async Task<IActionResult> Update(string Id, [FromForm] TreeReq tree, IFormFile image)
+        {
+            var res = await _treeService.UpdateAsync(Id, tree, image);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpDelete]
+        [Route("SoftDelete")]
+        public async Task<IActionResult> SoftDelete(string Id)
+        {
+            var res = await _treeService.SoftDeleteAsync(Id);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpDelete]
+        [Route("Delete")]
+        public async Task<IActionResult> DeleteTree(string Id)
+        {
+            var res = await _treeService.DeleteAsync(Id);
+            return StatusCode((int)res.StatusCode,res);
         }
     }
 }

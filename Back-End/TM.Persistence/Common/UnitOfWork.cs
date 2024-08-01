@@ -18,24 +18,61 @@ namespace TM.Persistence.Common
             _context = context;
 
         }
+        private TreeRepository _treeRepository;
+        private UserRepository _userRepository;
+        private AssignmentRepository _assignmentRepository;
+        private PositionRepository _positionRepository;
+        private TypeTreeRepository _typeTreeRepository;
+        private WorkContentRepository _workContentRepository;
 
-        private TreeRepository TreeRepository;
         public ITreeRepository TreeRepo
         {
             get
             {
-                return TreeRepository ??= new(_context);
+                return _treeRepository ??= new(_context);
             }
         }
 
-        private UserRepository UserRepository;
         public IUserRepository UserRepo
         {
             get
             {
-                return UserRepository ??= new(_context);
+                return _userRepository ??= new(_context);
             }
         }
+
+        public IAssignmentRepository AssignmentRepo
+        {
+            get
+            {
+                return _assignmentRepository ??= new(_context);
+            }
+        }
+
+        public IPositionRepository PositionRepo
+        {
+            get
+            {
+                return _positionRepository ??= new(_context);
+            }
+        }
+
+        public ITypeTreeRepository TypeTreeRepo
+        {
+            get
+            {
+                return _typeTreeRepository ??= new(_context);
+            }
+        }
+
+        public IWorkContentRepository WorkContentRepo
+        {
+            get
+            {
+                return _workContentRepository ??= new(_context);
+            }
+        }
+
 
         public Task BeginTransactionAsync()
         {

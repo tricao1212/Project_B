@@ -22,4 +22,8 @@
     <ProjectReference Include="..\TM.Persistence\TM.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="uploads\" />
+  </ItemGroup>
+
 </Project>
