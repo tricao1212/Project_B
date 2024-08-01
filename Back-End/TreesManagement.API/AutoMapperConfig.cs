@@ -18,7 +18,6 @@ namespace TM.Application.Configs
         public AutoMapperConfig()
         {
             CreateMap<User, UserRes>();
-            
             CreateMap<RegisterReq, User>();
             CreateMap<UpdateUserReq, User>();
 
@@ -34,8 +33,8 @@ namespace TM.Application.Configs
             CreateMap<AssignmentReq, Assignment>()
                 .ForMember(dest => dest.WorkContent, opt => opt.MapFrom(src => src.WorkContent));
             CreateMap<Assignment, AssignmentRes>();
-            //CreateMap<Assignment, AssignmentDtos>();
             CreateMap<Assignment, UserAssignment>();
+            CreateMap<Assignment, TreeAssignment>();
 
             CreateMap<Tree, TreeDtos>()
                 .ForMember(dest => dest.Lat, opt => opt.MapFrom(src => src.Position.Lat))

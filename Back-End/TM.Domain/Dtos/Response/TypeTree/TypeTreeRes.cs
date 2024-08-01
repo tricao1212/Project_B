@@ -6,6 +6,6 @@ namespace TM.Domain.Dtos.Response.TypeTree
     {
         public string? Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public ICollection<TreeDtos>? ListTrees { get; set; }
+        public List<TreeDtos>? ListTrees { get; set; } = new List<TreeDtos>();
     }
 }

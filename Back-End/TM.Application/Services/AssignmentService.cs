@@ -16,20 +16,6 @@ namespace TM.Application.Services
         {
         }
 
-        public async Task<Result<IEnumerable<AssignmentRes>>> FindAll()
-        {
-            try
-            {
-                var res = await _unitOfWork.AssignmentRepo.FindAllAsync();
-                var resData = _mapper.Map<IEnumerable<AssignmentRes>>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<IEnumerable<AssignmentRes>>(ex.Message);
-            }
-        }
-
         public async Task<Result<IEnumerable<AssignmentRes>>> GetAll()
         {
             try
@@ -41,26 +27,6 @@ namespace TM.Application.Services
             catch (Exception ex)
             {
                 return BadRequest<IEnumerable<AssignmentRes>>(ex.Message);
-            }
-        }
-
-        public async Task<Result<AssignmentRes>> FindById(string Id)
-        {
-            try
-            {
-                var res = await _unitOfWork.AssignmentRepo.FindByIdAsync(Id);
-
-                if(res == null)
-                {
-                    return NotFound<AssignmentRes>("Assignment not found!");
-                }
-
-                var resData = _mapper.Map<AssignmentRes>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<AssignmentRes>(ex.Message);
             }
         }
 
@@ -91,7 +57,7 @@ namespace TM.Application.Services
                 var treeExist = await _unitOfWork.TreeRepo.FindByIdAsync(assignment.TreeId);
                 var userExist = await _unitOfWork.UserRepo.FindByIdAsync(assignment.UserId);
 
-                if(treeExist == null)
+                if (treeExist == null)
                 {
                     return NotFound<bool>("This tree is not exist!");
                 }
@@ -110,13 +76,13 @@ namespace TM.Application.Services
                 return BadRequest<bool>(ex.Message);
             }
         }
-        
+
         public async Task<Result<bool>> UpdateAsync(string Id, AssignmentReq assignment)
         {
             try
             {
                 var assignExist = await _unitOfWork.AssignmentRepo.FindByIdAsync(Id);
-                if(assignExist == null)
+                if (assignExist == null)
                 {
                     return NotFound<bool>("Assignment not found!");
                 }
@@ -169,6 +135,34 @@ namespace TM.Application.Services
                 }
 
                 await _unitOfWork.AssignmentRepo.UpdateAsync(assignExist);
+                return Success(true);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest<bool>(ex.Message);
+            }
+        }
+
+        public async Task<Result<bool>> UpdateStatus(string Id, AssignmentReq assignment)
+        {
+            try
+            {
+                var existedAssign = await _unitOfWork.AssignmentRepo.FindByIdAsync(Id);
+
+                if (existedAssign == null)
+                {
+                    return NotFound<bool>("This assignment is not exist!");
+                }
+
+                foreach (var workContentReq in assignment.WorkContent)
+                {
+                    var existingWorkContent = existedAssign.WorkContent
+                        .FirstOrDefault(w => w.Id == workContentReq.Id);
+
+                    _mapper.Map(workContentReq, existingWorkContent);
+                }
+
+                await _unitOfWork.AssignmentRepo.UpdateAsync(existedAssign);
                 return Success(true);
             }
             catch (Exception ex)

@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,6 +14,7 @@ using TM.Domain.Common;
 using TM.Domain.Dtos.Request.User;
 using TM.Domain.Dtos.Response.User;
 using TM.Domain.Entity;
+using TM.Domain.Enum;
 using TM.Domain.Repository_Interface;
 
 namespace TM.Application.Services
@@ -17,9 +22,11 @@ namespace TM.Application.Services
     public class UserService : BaseService, IUserService
     {
         private readonly IConfiguration _configuration;
-        public UserService(IUnitOfWork _unitOfWork, IMapper _mapper, IConfiguration configuration) : base(_unitOfWork, _mapper)
+        private readonly IWebHostEnvironment _environment;
+        public UserService(IUnitOfWork _unitOfWork, IMapper _mapper, IConfiguration configuration, IWebHostEnvironment environment) : base(_unitOfWork, _mapper)
         {
             _configuration = configuration;
+            _environment = environment;
         }
 
         public async Task<Result<IEnumerable<UserRes>>> GetAll()
@@ -56,13 +63,23 @@ namespace TM.Application.Services
             }
         }
 
-        public async Task<Result<bool>> UpdateAsync(string Id, UpdateUserReq user)
+        public async Task<Result<bool>> UpdateAsync(string Id, [FromForm] UpdateUserReq user, IFormFile image)
         {
             var userExist = await _unitOfWork.UserRepo.FindByIdAsync(Id);
 
             if (userExist == null)
             {
                 return NotFound<bool>("User is not exist");
+            }
+
+            if (image != null)
+            {
+                if (userExist.Avatar != null)
+                {
+                    DeleteImage(userExist.Avatar);
+                }
+                var newImagePath = await SaveImageAsync(image);
+                userExist.Avatar = newImagePath;
             }
 
             _mapper.Map(user, userExist);
@@ -97,15 +114,17 @@ namespace TM.Application.Services
             return BadRequest<LoginRes>("User name or password is not correct!");
         }
 
-        public async Task<Result<bool>> Register(RegisterReq user)
+        public async Task<Result<bool>> Register([FromForm] RegisterReq user, IFormFile imageFile)
         {
             var userExist = await _unitOfWork.UserRepo.GetByUserName(user.UserName);
+            var imagePath = await SaveImageAsync(imageFile);
             if (userExist == null)
             {
                 try
                 {
                     user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
                     var userReq = _mapper.Map<User>(user);
+                    userReq.Avatar = imagePath;
                     await _unitOfWork.UserRepo.CreateAsync(userReq);
                     return Success(true);
                 }
@@ -149,6 +168,11 @@ namespace TM.Application.Services
 
             try
             {
+                if (user.Avatar != null)
+                {
+                    DeleteImage(user.Avatar);
+                }
+
                 await _unitOfWork.UserRepo.DeleteAsync(user);
                 return Success(true);
             }
@@ -158,15 +182,17 @@ namespace TM.Application.Services
             }
         }
 
-        public string GenerateJWTToken(User user)
+        private string GenerateJWTToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.UserData, user.UserName),
-                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
@@ -176,6 +202,38 @@ namespace TM.Application.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<string> SaveImageAsync(IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+                throw new ArgumentException("No image provided");
+
+            var uploadsFolder = Path.Combine(_environment.ContentRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + image.FileName;
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(fileStream);
+            }
+
+            return uniqueFileName;
+        }
+
+        private void DeleteImage(string imagePath)
+        {
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                var filePath = Path.Combine(_environment.ContentRootPath, "uploads", imagePath);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            }
         }
     }
 }

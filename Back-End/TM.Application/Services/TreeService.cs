@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TM.Application.Common;
 using TM.Application.Services_Interface;
 using TM.Domain.Common;
@@ -21,20 +20,6 @@ namespace TM.Application.Services
             _environment = environment;
         }
 
-        public async Task<Result<IEnumerable<TreeRes>>> FindAll()
-        {
-            try
-            {
-                var res = await _unitOfWork.TreeRepo.FindAllAsync();
-                var resData = _mapper.Map<IEnumerable<TreeRes>>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<IEnumerable<TreeRes>>(ex.Message);
-            }
-        }
-
         public async Task<Result<IEnumerable<TreeRes>>> GetAll()
         {
             try
@@ -46,26 +31,6 @@ namespace TM.Application.Services
             catch (Exception ex)
             {
                 return BadRequest<IEnumerable<TreeRes>>(ex.Message);
-            }
-        }
-
-        public async Task<Result<TreeRes>> FindById(string Id)
-        {
-            try
-            {
-                var res = await _unitOfWork.TreeRepo.FindByIdAsync(Id);
-
-                if(res == null)
-                {
-                    return NotFound<TreeRes>("This tree is not exist!");
-                }
-
-                var resData = _mapper.Map<TreeRes>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<TreeRes>(ex.Message);
             }
         }
 
@@ -138,7 +103,10 @@ namespace TM.Application.Services
 
                 if (imageFile != null)
                 {
-                    DeleteImage(existingTree.Image);
+                    if (existingTree.Image != null)
+                    {
+                        DeleteImage(existingTree.Image);
+                    }
                     var newImagePath = await SaveImageAsync(imageFile);
                     existingTree.Image = newImagePath;
                 }
@@ -180,7 +148,10 @@ namespace TM.Application.Services
 
             try
             {
-                DeleteImage(tree.Image);
+                if (tree.Image != null)
+                {
+                    DeleteImage(tree.Image);
+                }
                 await _unitOfWork.TreeRepo.DeleteAsync(tree);
                 return Success(true);
             }

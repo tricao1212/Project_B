@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TM.Application.Services_Interface;
-using TM.Domain.Common;
 using TM.Domain.Dtos.Request.Tree;
-using TM.Domain.Entity;
 
 namespace TreesManagement.API.Controllers
 {
@@ -25,14 +23,6 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindAll")]
-        public async Task<IActionResult> FindAll()
-        {
-            var res = await _treeService.FindAll();
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("GetById")]
         public async Task<IActionResult> GetById(string Id)
@@ -41,16 +31,9 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindById")]
-        public async Task<IActionResult> FindById(string Id)
-        {
-            var res = await _treeService.FindById(Id);
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("Add")]
+        [Authorize]
         public async Task<IActionResult> Create([FromForm] TreeReq tree, IFormFile image)
         {
             var res = await _treeService.CreateAsync(tree,image);
@@ -58,6 +41,7 @@ namespace TreesManagement.API.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         [Route("Update")]
         public async Task<IActionResult> Update(string Id, [FromForm] TreeReq tree, IFormFile image)
         {
@@ -66,6 +50,7 @@ namespace TreesManagement.API.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         [Route("SoftDelete")]
         public async Task<IActionResult> SoftDelete(string Id)
         {
@@ -74,6 +59,7 @@ namespace TreesManagement.API.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         [Route("Delete")]
         public async Task<IActionResult> DeleteTree(string Id)
         {

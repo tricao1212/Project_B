@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TM.Application.Services;
 using TM.Application.Services_Interface;
-using TM.Domain.Dtos.Request.Tree;
 using TM.Domain.Dtos.Request.TypeTree;
-using TM.Domain.Entity;
 
 namespace TreesManagement.API.Controllers
 {
@@ -27,14 +24,6 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindAll")]
-        public async Task<IActionResult> FindAll()
-        {
-            var res = await _typeTreeService.FindAll();
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("GetById")]
         public async Task<IActionResult> GetById(string Id)
@@ -43,16 +32,9 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindById")]
-        public async Task<IActionResult> FindById(string Id)
-        {
-            var res = await _typeTreeService.FindById(Id);
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("Add")]
+        [Authorize]
         public async Task<IActionResult> Create(TypeTreeReq typeTree)
         {
             var res = await _typeTreeService.CreateAsync(typeTree);
@@ -61,6 +43,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpPut]
         [Route("Update")]
+        [Authorize]
         public async Task<IActionResult> Update(string Id, TypeTreeReq typeTree)
         {
             var res = await _typeTreeService.UpdateAsync(Id, typeTree);
@@ -69,6 +52,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpDelete]
         [Route("SoftDelete")]
+        [Authorize]
         public async Task<IActionResult> SoftDelete(string Id)
         {
             var res = await _typeTreeService.SoftDeleteAsync(Id);
@@ -77,6 +61,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpDelete]
         [Route("Delete")]
+        [Authorize]
         public async Task<IActionResult> DeleteTree(string Id)
         {
             var res = await _typeTreeService.DeleteAsync(Id);

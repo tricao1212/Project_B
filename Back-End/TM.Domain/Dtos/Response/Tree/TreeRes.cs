@@ -22,6 +22,6 @@ namespace TM.Domain.Dtos.Response.Tree
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; } 
         public string? UpdatedBy { get; set; } 
-        public ICollection<AssignmentDtos>? Assignments { get; set; } 
+        public List<TreeAssignment>? Assignments { get; set; } = new List<TreeAssignment> ();
     }
 }

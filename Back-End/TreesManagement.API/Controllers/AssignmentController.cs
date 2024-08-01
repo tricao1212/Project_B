@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TM.Application.Services;
 using TM.Application.Services_Interface;
@@ -26,14 +27,6 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindAll")]
-        public async Task<IActionResult> FindAll()
-        {
-            var res = await _assignmentService.FindAll();
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("GetById")]
         public async Task<IActionResult> GetById(string Id)
@@ -42,16 +35,9 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
-        [HttpGet]
-        [Route("FindById")]
-        public async Task<IActionResult> FindById(string Id)
-        {
-            var res = await _assignmentService.FindById(Id);
-            return StatusCode((int)res.StatusCode, res);
-        }
-
         [HttpPost]
         [Route("Add")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> Create(AssignmentReq asignment)
         {
             var res = await _assignmentService.CreateAsync(asignment);
@@ -60,6 +46,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpPut]
         [Route("Update")]
+        [Authorize]
         public async Task<IActionResult> Update(string Id, AssignmentReq asignment)
         {
             var res = await _assignmentService.UpdateAsync(Id, asignment);
@@ -68,6 +55,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpDelete]
         [Route("SoftDelete")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> SoftDelete(string Id)
         {
             var res = await _assignmentService.SoftDeleteAsync(Id);
@@ -76,6 +64,7 @@ namespace TreesManagement.API.Controllers
 
         [HttpDelete]
         [Route("Delete")]
+        [Authorize(Roles = "Admin, Manager")]
         public async Task<IActionResult> DeleteTree(string Id)
         {
             var res = await _assignmentService.DeleteAsync(Id);

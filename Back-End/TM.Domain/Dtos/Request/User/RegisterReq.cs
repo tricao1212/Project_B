@@ -17,8 +17,6 @@ namespace TM.Domain.Dtos.Request.User
         [Phone]
         public string? Phone { get; set; }
 
-        public string? Avatar { get; set; }
-
         public DateTime? Dob { get; set; }
 
         [Required]

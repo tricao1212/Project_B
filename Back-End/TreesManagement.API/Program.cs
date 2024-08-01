@@ -10,6 +10,7 @@ using TM.Application.Services_Interface;
 using TM.Domain.Repository_Interface;
 using TM.Persistence.Common;
 using TM.Persistence.Data;
+using TreesManagement.API.MiddleWares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,15 +67,33 @@ builder.Services.AddAuthentication(options =>
         {
             // Skip the default logic.
             context.HandleResponse();
+            if (!context.Response.HasStarted)
+            {
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
+                var response = new
+                {
+                    statusCode = StatusCodes.Status401Unauthorized,
+                    isSuccess = false,
+                    message = "Unauthorized",
+                };
+
+                var jsonResponse = JsonSerializer.Serialize(response);
+                return context.Response.WriteAsync(jsonResponse);
+            }
+            return Task.CompletedTask;
+        },
+        OnForbidden = context =>
+        {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
             var response = new
             {
-                statusCode = StatusCodes.Status401Unauthorized,
+                statusCode = StatusCodes.Status403Forbidden,
                 isSuccess = false,
-                message = "Unauthorized",
+                message = "Dont have permission to access",
             };
 
             var jsonResponse = JsonSerializer.Serialize(response);

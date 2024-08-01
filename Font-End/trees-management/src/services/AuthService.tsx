@@ -1,7 +1,7 @@
 import axios from "../config/axiosCustomize";
-import { ILogin } from "../interfaces/Request/ILoginReq";
+import { ILoginReq } from "../interfaces/Request/User/LoginReq";
 
-const loginService = async (loginData: ILogin) => {
+const loginService = async (loginData: ILoginReq) => {
   return (await axios.post("/user/login", loginData)).data;
 };
 

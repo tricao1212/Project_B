@@ -8,7 +8,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import { loginService } from "../services/AuthService";
-import { ILogin } from "../interfaces/Request/ILoginReq";
+import { ILoginReq } from "../interfaces/Request/User/LoginReq";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../redux/Slices/authSlice";
 
@@ -28,11 +28,11 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ILogin>({
+  } = useForm<ILoginReq>({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (data: ILogin) => {
+  const onSubmit = async (data: ILoginReq) => {
     setLoading(true);
 
     var res = await loginService(data);

@@ -15,20 +15,6 @@ namespace TM.Application.Services
     {
         public TypeTreeService(IUnitOfWork _unitOfWork, IMapper _mapper) : base(_unitOfWork, _mapper) { }
 
-        public async Task<Result<IEnumerable<TypeTreeRes>>> FindAll()
-        {
-            try
-            {
-                var res = await _unitOfWork.TypeTreeRepo.FindAllAsync();
-                var resData = _mapper.Map<IEnumerable<TypeTreeRes>>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<IEnumerable<TypeTreeRes>>(ex.Message);
-            }
-        }
-
         public async Task<Result<IEnumerable<TypeTreeRes>>> GetAll()
         {
             try
@@ -40,26 +26,6 @@ namespace TM.Application.Services
             catch (Exception ex)
             {
                 return BadRequest<IEnumerable<TypeTreeRes>>(ex.Message);
-            }
-        }
-
-        public async Task<Result<TypeTreeRes>> FindById(string Id)
-        {
-            try
-            {
-                var res = await _unitOfWork.TypeTreeRepo.FindByIdAsync(Id);
-
-                if (res == null)
-                {
-                    return NotFound<TypeTreeRes>("This type is not exist!");
-                }
-
-                var resData = _mapper.Map<TypeTreeRes>(res);
-                return Success(resData);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest<TypeTreeRes>(ex.Message);
             }
         }
 

@@ -18,11 +18,14 @@ namespace TreesManagement.API.MiddleWares
             if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
             {
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsJsonAsync(new
-                {
-                    Message = "Unauthorized access.",
-                    StatusCode = StatusCodes.Status401Unauthorized
-                });
+                var response = new { message = "Unauthorized access. Please login." };
+                await context.Response.WriteAsJsonAsync(response);
+            }
+            else if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
+            {
+                context.Response.ContentType = "application/json";
+                var response = new { message = "Forbidden access. You do not have permission to access this resource." };
+                await context.Response.WriteAsJsonAsync(response);
             }
         }
     }

@@ -3,7 +3,7 @@ import { getAllUserService } from "../../services/Users/getAllUserService";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { IUserRes } from "../../interfaces/Response/IUserRes";
-import { getAllTreeService } from "../../services/Trees/getAllTreeService";
+import { getAll } from "../../services/TreeApi";
 import { ITree } from "../../interfaces/Response/ITreeeRes";
 import Loading from "../../components/Loading";
 
@@ -19,7 +19,7 @@ const HomeAdmin = () => {
     };
 
     const trees = async () => {
-      const res = await getAllTreeService();
+      const res = await getAll();
       setTotalTrees(res.data);
     };
 

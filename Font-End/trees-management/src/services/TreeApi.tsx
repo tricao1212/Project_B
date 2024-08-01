@@ -1,7 +1,7 @@
 import axios from "../config/axiosCustomize";
 
 const getAll = async () => {
-  return (await axios.get("/tree/all")).data;
+  return (await axios.get("/tree/getall")).data;
 };
 
 const addNew = async (formData: FormData) => {
