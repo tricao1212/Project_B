@@ -3,13 +3,24 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import logo from "../assets/logo.png";
 import { useEffect, useState } from "react";
-import { useMediaQuery } from "@mui/material";
+import { Tooltip, useMediaQuery } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
-import { asideItems } from "../common/asideItems";
+import { useDispatch } from "react-redux";
+import { removeAuth } from "../redux/Slices/authSlice";
+import { Aside } from "../interfaces/Aside";
 
-const DashboardSidebar = () => {
+interface AsideComponentProps {
+  asideItems: Aside[];
+}
+
+const DashboardSidebar = ({asideItems} : AsideComponentProps) => {
   const isMdScreen = useMediaQuery("(min-width: 1080px)");
   const [expanded, setExpanded] = useState(isMdScreen);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(removeAuth());
+  };
 
   let pathname = useLocation().pathname;
   function activeFunct(type: string) {
@@ -40,7 +51,11 @@ const DashboardSidebar = () => {
   }, [isMdScreen]);
 
   return (
-    <aside className={`border-r relative ease-in-out duration-500 ${expanded ? "w-80" : "w-20"}`}>
+    <aside
+      className={`border-r relative ease-in-out duration-500 ${
+        expanded ? "w-80" : "w-20"
+      }`}
+    >
       <nav className="flex h-full flex-col bg-green-200 shadow-sm p-5">
         <div className="flex justify-center items-center pb-5">
           <img
@@ -62,26 +77,45 @@ const DashboardSidebar = () => {
           </button>
         </div>
         <div className="space-y-5">
-          {asideItems.map((items, index) => (
-            <Link
-              key={index}
-              to={items.link}
-              className={activeFunct(items.link)}
-            >
-              {items.icon}
-              <span
-                className={`overflow-hidden ease-in-out duration-500 ${
-                  expanded ? "ml-2" : "ml-0 w-0"
-                }`}
+          {asideItems.map((items, index) =>
+            expanded ? (
+              <Link
+                key={index}
+                to={items.link}
+                className={activeFunct(items.link)}
               >
-                {items.title}
-              </span>
-            </Link>
-          ))}
+                {items.icon}
+                <span
+                  className={`overflow-hidden ease-in-out duration-500 ${
+                    expanded ? "ml-2" : "ml-0 w-0"
+                  }`}
+                >
+                  {items.title}
+                </span>
+              </Link>
+            ) : (
+              <Tooltip key={index} title={items.title}>
+                <Link
+                  key={index}
+                  to={items.link}
+                  className={activeFunct(items.link)}
+                >
+                  {items.icon}
+                  <span
+                    className={`overflow-hidden ease-in-out duration-500 ${
+                      expanded ? "ml-2" : "ml-0 w-0"
+                    }`}
+                  >
+                    {items.title}
+                  </span>
+                </Link>
+              </Tooltip>
+            )
+          )}
         </div>
 
-        <Link
-          to={"/"}
+        <button
+          onClick={() => handleLogout()}
           className="flex items-center text-lg font-mono cursor-pointer p-2 hover:bg-white rounded-md mt-auto"
         >
           <LogoutIcon />
@@ -92,7 +126,7 @@ const DashboardSidebar = () => {
           >
             Logout
           </span>
-        </Link>
+        </button>
       </nav>
     </aside>
   );

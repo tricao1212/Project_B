@@ -38,5 +38,10 @@ namespace TM.Persistence.Repositories
                                .Where(x => x.IsDeleted == false)
                                .FirstOrDefaultAsync(x => x.Id == id);
         }
+
+        public async Task<Assignment?> FindAssignmentByUserAndTree(string userId, string treeId)
+        {
+            return await _dbSet.FirstOrDefaultAsync(x => x.UserId == userId && x.TreeId == treeId);
+        }
     }
 }

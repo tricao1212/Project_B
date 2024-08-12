@@ -1,134 +1,235 @@
-import { useEffect, useState } from "react";
-import { IUserRes } from "../../interfaces/Response/IUserRes";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { getAllUserService } from "../../services/Users/getAllUserService";
 import Loading from "../../components/Loading";
+import { ColTable } from "../../interfaces/ColTable";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+} from "@mui/material";
+import DeleteConfirm from "../../components/DeleteConfirm";
+import { useToast } from "../../components/Toastify";
+import { UserRes } from "../../interfaces/Response/User/UserRes";
+import { deleteUser, getAllUser } from "../../services/UserApi";
+import AddUserDialogForm from "../../components/AddUserDialogForm";
+import EditUserDialogForm from "../../components/EditUserDialogForm";
+import { formatDateOnly } from "../../utils/formatDate";
+import { getUserRoleName } from "../../utils/getUSerRole";
+import { Role } from "../../interfaces/Enum/Role";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Users = () => {
-  const [users, setUsers] = useState<IUserRes[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortColumn, setSortColumn] = useState<keyof IUserRes>('userName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(5);
   const { token } = useSelector((state: RootState) => state.auth);
+  const { showToast } = useToast();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock data - replace this with your actual data fetching logic
-  useEffect(() => {
-    const users = async () => {
-      const res = await getAllUserService(token);
-      setUsers(res.data);
-    };
-    users();
-  }, []);
-
-  // Search functionality
-  const filteredUsers = users.filter(user =>
-    Object.values(user).some(value => 
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  // Sorting functionality
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
+  const columns: ColTable[] = [
+    { title: "Avatar", map: "avatar" },
+    { title: "Full Name", map: "fullName" },
+    { title: "Phone", map: "phone" },
+    { title: "Date Of Birth", map: "dob" },
+    { title: "Role", map: "role" },
+  ];
   
-    if (aValue === null || aValue === undefined) return sortDirection === 'asc' ? -1 : 1;
-    if (bValue === null || bValue === undefined) return sortDirection === 'asc' ? 1 : -1;
+  const queryClient = useQueryClient();
   
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
-        ? aValue.localeCompare(bValue) 
-        : bValue.localeCompare(aValue);
-    }
-  
-    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-    return 0;
+  const {
+    data: users = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<UserRes[]>({
+    queryKey: ["users"],
+    queryFn: () => getAllUser(token).then((res) => res.data),
   });
 
-  // Pagination
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const mutation = useMutation({
+    mutationFn: async (userId: string) => await deleteUser(userId, token),
+    onSuccess: async (data) => {
+      if (data.isSuccess) {
+        await queryClient.invalidateQueries({ queryKey: ["users"] });
+        showToast("Successful!", "success");
+      } else {
+        showToast(data.message, "error");
+      }
+    },
+    onError: (error) => {
+      showToast(error.message || "Failed to delete user", "error");
+    },
+  });
 
-  const handleSort = (column: keyof IUserRes) => {
-    if (column === sortColumn) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
+  const removeDiacritics = (text: string): string => {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(removeDiacritics(event.target.value));
+  };
+
+  const filteredData = users.filter((row) => {
+    return columns.some((column) => {
+      const value = row[column.map as keyof UserRes];
+      const cleanValue = value
+        ? removeDiacritics(value.toString()).toLowerCase()
+        : "";
+      return value ? cleanValue.includes(searchTerm.toLowerCase()) : false;
+    });
+  });
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
   };
 
   const render = (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Users Management</h1>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-full p-2 mb-4 border rounded"
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead className="bg-gray-100">
-          <tr>
-            {['avatar','user name', 'name', 'dob', 'phone', 'role'].map((column) => (
-              <th
-                key={column}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort(column as keyof IUserRes)}
-              >
-                {column}
-                {sortColumn === column && (
-                  <span className="ml-1">
-                    {sortDirection === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {currentUsers.map((user) => (
-            <tr key={user.userName} className="bg-white sm:hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 sm:table-cell">{user.avatar}</td>
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">{user.userName}</td>
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">{user.fullName}</td>
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">{user.dob}</td>
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">{user.phone}</td>
-              <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">{user.role === 1? "staff" : "manager"}</td>
-            </tr>
-          ))}
-          </tbody>
-        </table>
+    <div className="container mx-auto">
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-bold">Users Management</h1>
+        <AddUserDialogForm handleFecth={refetch} />
       </div>
-      <div className="mt-4">
-        {Array.from({ length: Math.ceil(sortedUsers.length / usersPerPage) }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => paginate(i + 1)}
-            className={`mx-1 px-3 py-1 border rounded ${
-              currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
-            }`}
+      <div>
+        <div className="mx-auto mb-4">
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={searchTerm}
+            onChange={handleSearch}
+            fullWidth
+          />
+        </div>
+        <TableContainer
+          sx={{
+            maxHeight: 500,
+            border: "1px solid grey",
+            borderRadius: "10px",
+          }}
+        >
+          <Table
+            stickyHeader
+            aria-label="sticky table"
+            className="justify-center items-center flex"
           >
-            {i + 1}
-          </button>
-        ))}
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.title}
+                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    className="uppercase"
+                    align="center"
+                  >
+                    {column.title}
+                  </TableCell>
+                ))}
+                <TableCell
+                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                  align="center"
+                  className="uppercase"
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, rowindex) => {
+                  return (
+                    <TableRow
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={rowindex}
+                    >
+                      {columns.map((column) => {
+                        let value;
+
+                        if (column.map === "dob") {
+                          var temp = row[column.map as keyof UserRes] as string;
+                          temp
+                            ? (value = formatDateOnly(new Date(temp)))
+                            : (value = row[column.map as keyof UserRes]);
+                        } else if (column.map === "role") {
+                          value = getUserRoleName(
+                            row[column.map as keyof UserRes] as Role
+                          );
+                        } else {
+                          value = row[column.map as keyof UserRes];
+                        }
+
+                        return (
+                          <TableCell key={column.map} align="center">
+                            <div className="flex justify-center items-center">
+                              {column.map === "avatar" ? (
+                                <img
+                                  src={
+                                    value
+                                      ? `http://localhost:2024/images/${value}`
+                                      : ""
+                                  }
+                                  alt={`${value} image`}
+                                  className="w-36 h-20"
+                                />
+                              ) : value ? (
+                                value.toString()
+                              ) : (
+                                "-"
+                              )}
+                            </div>
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell align="center">
+                        <EditUserDialogForm user={row} handleFetch={refetch} />
+                        <DeleteConfirm
+                          handleDelete={() => mutation.mutate(row.id)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </div>
     </div>
   );
 
   return (
     <>
-    {users ? render : <Loading/>}
+      {isLoading ? (
+        <Loading />
+      ) : isError ? (
+        <div>Error, please try again</div>
+      ) : (
+        render
+      )}
     </>
-  )
-}
+  );
+};
 
-export default Users
+export default Users;

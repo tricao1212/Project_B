@@ -43,7 +43,7 @@ namespace TreesManagement.API.Controllers
         [HttpPut]
         [Authorize]
         [Route("Update")]
-        public async Task<IActionResult> Update(string Id, [FromForm] TreeReq tree, IFormFile image)
+        public async Task<IActionResult> Update(string Id, [FromForm] TreeReq tree, IFormFile? image)
         {
             var res = await _treeService.UpdateAsync(Id, tree, image);
             return StatusCode((int)res.StatusCode, res);

@@ -61,6 +61,12 @@ namespace TM.Application.Services
                     await _unitOfWork.TypeTreeRepo.CreateAsync(newType);
                     return Success(true);
                 }
+                else if(type.IsDeleted == true)
+                {
+                    type.IsDeleted = false;
+                    await _unitOfWork.TypeTreeRepo.UpdateAsync(type);
+                    return Success(true);
+                }
 
                 return BadRequest<bool>("This type already existed");
             }

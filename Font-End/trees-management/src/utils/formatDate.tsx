@@ -1,7 +1,11 @@
 import { format } from "date-fns";
 
-const formatDate = (date: Date): string => {
+const formatDateTime = (date: Date): string => {
   return format(date, "MMMM d, yyyy, h:mm:ss aa");
 };
 
-export { formatDate };
+const formatDateOnly = (date: Date): string => {
+  return format(date, "MMMM d, yyyy");
+};
+
+export { formatDateTime, formatDateOnly };

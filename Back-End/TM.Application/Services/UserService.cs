@@ -114,17 +114,20 @@ namespace TM.Application.Services
             return BadRequest<LoginRes>("User name or password is not correct!");
         }
 
-        public async Task<Result<bool>> Register([FromForm] RegisterReq user, IFormFile imageFile)
+        public async Task<Result<bool>> Register([FromForm] RegisterReq user, IFormFile? imageFile)
         {
             var userExist = await _unitOfWork.UserRepo.GetByUserName(user.UserName);
-            var imagePath = await SaveImageAsync(imageFile);
             if (userExist == null)
             {
                 try
                 {
                     user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
                     var userReq = _mapper.Map<User>(user);
-                    userReq.Avatar = imagePath;
+                    if (imageFile != null)
+                    {
+                        var imagePath = await SaveImageAsync(imageFile);
+                        userReq.Avatar = imagePath;
+                    }
                     await _unitOfWork.UserRepo.CreateAsync(userReq);
                     return Success(true);
                 }

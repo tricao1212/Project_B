@@ -7,7 +7,7 @@ namespace TM.Domain.Dtos.Request.Tree
         [Required]
         public string Name { get; set; } = null!;
 
-        public double Age { get; set; }
+        public double? Age { get; set; }
 
         [Required]
         public double Heigh { get; set; }
@@ -15,7 +15,7 @@ namespace TM.Domain.Dtos.Request.Tree
         [Required]
         public double Diameter { get; set; }
 
-        public int PlantYear { get; set; }
+        public int? PlantYear { get; set; }
 
         [Required]
         public double Lat { get; set; }

@@ -47,12 +47,12 @@ namespace TM.Persistence.Data
                 entity.HasOne(e => e.Tree)
                     .WithMany(t => t.Assignments)
                     .HasForeignKey(e => e.TreeId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.Assignments)
                     .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(e => e.WorkContent)
                     .WithOne(u => u.Assignment)

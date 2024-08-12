@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { ILoginRes } from "../../interfaces/Response/ILoginRes";
+import { LoginRes } from "../../interfaces/Response/User/LoginRes";
 
-const initialState: ILoginRes = {
+const initialState: LoginRes = {
   token: "",
   user: null,
 };
@@ -11,7 +11,7 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuth: (state, action: PayloadAction<ILoginRes>) => {
+    setAuth: (state, action: PayloadAction<LoginRes>) => {
       (state.token = action.payload.token), (state.user = action.payload.user);
     },
     removeAuth: (state) => {

@@ -6,8 +6,11 @@ import Users from "../pages/admin/Users";
 import Trees from "../pages/admin/Trees";
 import ProtectedRoute from "../middlewares/ProtectedRoute";
 import HomeAdmin from "../pages/admin/HomeAdmin";
-import Test from "../Test";
 import Home from "../pages/main/Home";
+import TypeTrees from "../pages/admin/TypeTrees";
+import Assignments from "../pages/admin/Assignments";
+import Map from "../pages/admin/Map";
+import ResponsiveAppBar from "../pages/Test";
 
 const router = createBrowserRouter([
   {
@@ -16,11 +19,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <Home />
-      </ProtectedRoute>
-    ),
+    element: <Home />,
+  },
+  {
+    path: "/test",
+    element: <ResponsiveAppBar />,
   },
   {
     path: "/dashboard",
@@ -43,8 +46,16 @@ const router = createBrowserRouter([
         element: <Trees />,
       },
       {
-        path: "test",
-        element: <Test />,
+        path: "types",
+        element: <TypeTrees />,
+      },
+      {
+        path: "assignments",
+        element: <Assignments />,
+      },
+      {
+        path: "map",
+        element: <Map />,
       },
     ],
   },

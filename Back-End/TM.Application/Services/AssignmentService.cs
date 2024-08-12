@@ -67,9 +67,21 @@ namespace TM.Application.Services
                     return NotFound<bool>("This user is not exist!");
                 }
 
+                var assignmentExist = await _unitOfWork.AssignmentRepo.FindAssignmentByUserAndTree(assignment.UserId, assignment.TreeId);
                 var newAssignment = _mapper.Map<Assignment>(assignment);
-                await _unitOfWork.AssignmentRepo.CreateAsync(newAssignment);
+                if (assignmentExist == null)
+                {
+                    await _unitOfWork.AssignmentRepo.CreateAsync(newAssignment);
+                    return Success(true);
+                }
+
+                foreach (var wc in newAssignment.WorkContent)
+                {
+                    assignmentExist.WorkContent.Add(wc);
+                }
+                await _unitOfWork.AssignmentRepo.UpdateAsync(assignmentExist);
                 return Success(true);
+
             }
             catch (Exception ex)
             {

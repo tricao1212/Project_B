@@ -1,13 +1,35 @@
 import axios from "../config/axiosCustomize";
 
-const getAll = async () => {
-  return (await axios.get("/tree/getall")).data;
+const getAllTree = async () => {
+  const response = (await axios.get("/tree/getall")).data;
+  return response;
 };
 
-const addNew = async (formData: FormData) => {
+const getTreeById = async (id: string) => {
+  const response = (await axios.post(`/tree/getbyid/?Id=${id}`)).data;
+  return response;
+};
+
+const createTree = async (formData: FormData, token: string) => {
   const response = (
     await axios.post("/tree/add", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  ).data;
+
+  return response;
+};
+
+const updateTree = async (id:string , formData: FormData, token: string) => {
+  const response = (
+    await axios.put(`/tree/update?Id=${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     })
   ).data;
 
@@ -15,8 +37,20 @@ const addNew = async (formData: FormData) => {
 };
 
 const deleteTree = async (id: string, token: string) => {
-  return (
+  const response = (
     await axios.delete(`/tree/delete/?Id=${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  ).data;
+
+  return response;
+};
+
+const softDeleteTree = async (id: string, token: string) => {
+  return (
+    await axios.delete(`/tree/softdelete/?Id=${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -24,4 +58,11 @@ const deleteTree = async (id: string, token: string) => {
   ).data;
 };
 
-export { getAll, addNew, deleteTree };
+export {
+  getAllTree,
+  getTreeById,
+  createTree,
+  updateTree,
+  deleteTree,
+  softDeleteTree,
+};

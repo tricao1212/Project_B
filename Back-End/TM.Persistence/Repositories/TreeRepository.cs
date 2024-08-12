@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TM.Domain.Dtos.Response.TypeTree;
 using TM.Domain.Entity;
 using TM.Domain.Repository_Interface;
 using TM.Persistence.Common;
@@ -12,12 +13,20 @@ namespace TM.Persistence.Repositories
         }
         public override async Task<IEnumerable<Tree>> GetAllAsync()
         {
-            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+            var trees = await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
                                .Include(x => x.Position)
                                .Include(x => x.TypeTree)
                                .AsNoTracking()
                                .Where(x => x.IsDeleted == false)
                                .ToListAsync();
+            foreach (var tree in trees)
+            {
+                if (tree.TypeTree?.IsDeleted == true)
+                {
+                    tree.TypeTree = new TypeTree {};
+                }
+            }
+            return trees;
         }
 
         public override async Task<IEnumerable<Tree>> FindAllAsync()
@@ -67,6 +76,5 @@ namespace TM.Persistence.Repositories
 
             return $"T{nextNumber:D5}";
         }
-
     }
 }

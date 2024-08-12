@@ -14,13 +14,11 @@ const ProtectedRoute = ({ children }: protectedRouteProps) => {
       navigate("/login");
     }
 
-    if (user !== null && user.role === 0) {
+    if (user !== null) {
       navigate("/dashboard");
     }
 
-    if (user !== null && user.role === 1) {
-      navigate("/");
-    }
+
   }, [user]);
 
   return user ? children : null;

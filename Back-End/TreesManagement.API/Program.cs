@@ -26,8 +26,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
         var response = new
         {
             IsSuccess = false,
-            Message = "Validation failed",
-            Errors = errors
+            Message = errors,
         };
         return new BadRequestObjectResult(response);
     };

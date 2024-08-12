@@ -2,15 +2,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, TextField } from "@mui/material";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
-import { loginService } from "../services/AuthService";
-import { ILoginReq } from "../interfaces/Request/User/LoginReq";
+import { login } from "../services/UserApi";
+import { LoginReq, schema } from "../interfaces/Request/User/LoginReq";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../redux/Slices/authSlice";
+import logo from "../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [visible, setVisible] = useState(false);
@@ -18,27 +18,22 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const schema = yup.object().shape({
-    userName: yup.string().required("Username is a required field"),
-    password: yup.string().required("Password is a required field"),
-  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ILoginReq>({
+  } = useForm<LoginReq>({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (data: ILoginReq) => {
+  const onSubmit = async (data: LoginReq) => {
     setLoading(true);
 
-    var res = await loginService(data);
+    var res = await login(data);
     if (res.isSuccess) {
       dispatch(setAuth(res.data));
-      navigate("/dashboard");
+      navigate("/");
     } else {
       setIsError(true);
     }
@@ -47,8 +42,13 @@ const Login = () => {
 
   const render = (
     <>
-      <div className="flex h-full items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex h-full min-h-screen bg-gray-100 justify-center items-center">
         <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
+          <div className="bg-white p-5 flex justify-center items-center">
+            <a href="/">
+            <img className="w-52 cursor-pointer" src={logo} alt="Logo"/>
+            </a>
+          </div>
           {isError && (
             <Alert severity="error">
               Username or Password is not correct !!!

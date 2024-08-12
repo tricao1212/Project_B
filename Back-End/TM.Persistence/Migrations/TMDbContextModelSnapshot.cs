@@ -106,7 +106,7 @@ namespace TM.Persistence.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Age")
+                    b.Property<double?>("Age")
                         .HasColumnType("float");
 
                     b.Property<DateTime>("CreatedAt")
@@ -117,7 +117,6 @@ namespace TM.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Diameter")
@@ -136,7 +135,7 @@ namespace TM.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PlantYear")
+                    b.Property<int?>("PlantYear")
                         .HasColumnType("int");
 
                     b.Property<string>("TreeCode")

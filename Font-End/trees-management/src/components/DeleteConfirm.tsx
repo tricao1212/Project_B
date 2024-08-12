@@ -9,11 +9,12 @@ import { IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 interface ActionProps {
-  id: string
-  handleDelete: (id: string) => void
+  handleDelete: () => void;
 }
 
-const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
+export default function DeleteConfirm({
+  handleDelete,
+}: ActionProps): React.ReactElement {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -21,9 +22,9 @@ const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
   };
 
   const onDedelete = () => {
-    handleDelete(id);
+    handleDelete();
     setOpen(false);
-  }
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -32,7 +33,7 @@ const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
   return (
     <React.Fragment>
       <IconButton aria-label="delete" onClick={() => handleClickOpen()}>
-        <DeleteIcon />
+        <DeleteIcon color="error" />
       </IconButton>
       <Dialog
         open={open}
@@ -40,7 +41,7 @@ const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id="alert-dialog-title" className="text-red-500">
           {"Are you sure you want to delete it?"}
         </DialogTitle>
         <DialogContent>
@@ -49,7 +50,9 @@ const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => onDedelete()} color="error">Delete</Button>
+          <Button onClick={() => onDedelete()} color="error">
+            Delete
+          </Button>
           <Button onClick={() => handleClose()} autoFocus>
             Cancel
           </Button>
@@ -58,5 +61,3 @@ const DeleteConfirm = ({id, handleDelete} : ActionProps) => {
     </React.Fragment>
   );
 }
-
-export default DeleteConfirm;

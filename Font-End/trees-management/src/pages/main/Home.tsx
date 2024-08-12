@@ -1,18 +1,177 @@
-import TreeMap from "../../components/Map";
-import { Tree } from "../../interfaces/types";
-
-const trees: Tree[] = [
-  { id: 1, name: 'Oak Tree', species: 'Quercus', age: 100, height: 20, lat: 51.505, lng: -0.09 },
-  { id: 2, name: 'Maple Tree', species: 'Acer', age: 50, height: 15, lat: 51.51, lng: -0.1 },
-  { id: 3, name: 'Pine Tree', species: 'Pinus', age: 75, height: 25, lat: 51.5, lng: -0.08 },
-];
+import TreeMap from "../../components/TreeMap";
+import { TreeRes } from "../../interfaces/Response/Tree/TreeRes";
+import { getAllTree } from "../../services/TreeApi";
+import logo from "../../assets/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { removeAuth } from "../../redux/Slices/authSlice";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "../../components/Loading";
+import LogoutIcon from "@mui/icons-material/Logout";
+import CategoryIcon from "@mui/icons-material/Category";
+import { Avatar, IconButton, Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { getUserRoleName } from "../../utils/getUSerRole";
 
 const Home = () => {
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Tree Map</h1>
-      <TreeMap trees={trees} />
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const {
+    data: trees = [],
+    isLoading,
+    isError,
+  } = useQuery<TreeRes[]>({
+    queryKey: ["trees"],
+    queryFn: () => getAllTree().then((res) => res.data),
+  });
+
+  const handleLogout = () => {
+    dispatch(removeAuth());
+  };
+
+  const render = (
+    <div className="mx-auto min-h-screen flex flex-col bg-green-200">
+      <div className="container mx-auto flex-grow mb-5">
+        <header className="p-5 bg-green-100 mb-5 rounded-lg flex items-center justify-between">
+          <a href="/">
+            <img className="w-52 cursor-pointer" src={logo} alt="Logo" />
+          </a>
+          {user === null ? (
+            <a href="/login">
+              <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700">
+                Login
+              </button>
+            </a>
+          ) : (
+            <>
+              <div className="hidden md:flex items-center space-x-4">
+                <a href="/dashboard">
+                  <button className="px-4 py-2 rounded hover:shadow-md group border-b">
+                    <CategoryIcon className="group-hover:text-green-500 transition-colors duration-300" />
+                    <span className="ml-2 group-hover:text-green-500 transition-colors duration-300">
+                      Dashboard
+                    </span>
+                  </button>
+                </a>
+                <button
+                  className="px-4 py-2 rounded hover:shadow-md group border-b"
+                  onClick={handleLogout}
+                >
+                  <LogoutIcon className="group-hover:text-green-500 transition-colors duration-300" />
+                  <span className="ml-2 group-hover:text-green-500 transition-colors duration-300">
+                    Logout
+                  </span>
+                </button>
+              </div>
+              <div className="flex flex-row items-start">
+                <div>
+                  <h2 className="font-bold text-lg">{user.fullName}</h2>
+                  <h2 className="text-base">
+                    {getUserRoleName(user.role)}
+                  </h2>
+                </div>
+                <IconButton
+                  onClick={handleClick}
+                  size="large"
+                  disabled={!isSmallScreen} // Disables the button on medium and larger screens
+                  sx={{ pointerEvents: !isSmallScreen ? "none" : "auto" }} // Disables click events on larger screens
+                >
+                  <Avatar
+                    alt="avatar"
+                    src={`http://localhost:2024/images/${user.avatar}`}
+                  />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  PaperProps={{
+                    sx: {
+                      width: "150px",
+                    },
+                  }}
+                >
+                  <MenuItem onClick={handleClose}>
+                    <a href="/dashboard" className="flex items-center">
+                      <CategoryIcon className="mr-2" />
+                      Dashboard
+                    </a>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleLogout();
+                      handleClose();
+                    }}
+                  >
+                    <LogoutIcon className="mr-2" />
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </div>
+            </>
+          )}
+        </header>
+        <TreeMap
+          initialTrees={trees}
+          areaCenter={[11.052829, 106.666128]} // Center of EIU
+          areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
+          minZoom={17}
+          maxZoom={18}
+        />
+      </div>
+      <footer className="container mx-auto p-5 bg-green-100 rounded-t-lg">
+        <div className="mx-auto flex flex-col md:flex-row">
+          <div className="text-left">
+            <img className="w-52" src={logo} alt="Logo" />
+            <h1 className="font-bold text-lg">
+              Trees Management System for Eastern International University
+            </h1>
+            <p>
+              <span className="font-bold">Address: </span>Nam kỳ khởi nghĩa,
+              Thành phố mới, Bình Dương
+            </p>
+            <p>
+              <span className="font-bold">Email: </span>EIU@edu.vn
+            </p>
+            <p>
+              <span className="font-bold">Tel: </span>0123456789
+            </p>
+          </div>
+        </div>
+        <hr className="my-2" />
+        <p className="text-sm">
+          © 2024 Trees Management System. All rights reserved.
+        </p>
+      </footer>
     </div>
+  );
+
+  return (
+    <>
+      {isLoading ? (
+        <Loading />
+      ) : isError ? (
+        <div>Error, please try again</div>
+      ) : (
+        render
+      )}
+    </>
   );
 };
 

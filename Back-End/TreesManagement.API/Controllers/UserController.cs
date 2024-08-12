@@ -35,7 +35,7 @@ namespace TreesManagement.API.Controllers
         [HttpPost]
         [Route("Register")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Register([FromForm] RegisterReq register, IFormFile image)
+        public async Task<IActionResult> Register([FromForm] RegisterReq register, IFormFile? image)
         {
             var res = await _userService.Register(register, image);
             return StatusCode((int)res.StatusCode, res);
@@ -43,7 +43,6 @@ namespace TreesManagement.API.Controllers
 
         [HttpPost]
         [Route("GetById")]
-        [Authorize]
         public async Task<IActionResult> GetById(string Id)
         {
             var res = await _userService.GetById(Id);
@@ -53,7 +52,7 @@ namespace TreesManagement.API.Controllers
         [HttpPut]
         [Route("Update")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(string Id, [FromForm] UpdateUserReq user, IFormFile image)
+        public async Task<IActionResult> Update(string Id, [FromForm] UpdateUserReq user, IFormFile? image)
         {
             var res = await _userService.UpdateAsync(Id, user, image);
             return StatusCode((int)res.StatusCode, res);

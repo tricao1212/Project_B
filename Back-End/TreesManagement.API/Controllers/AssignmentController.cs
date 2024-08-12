@@ -53,6 +53,15 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
+        [HttpPut]
+        [Route("UpdateStatus")]
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(string Id, AssignmentReq asignment)
+        {
+            var res = await _assignmentService.UpdateStatus(Id, asignment);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
         [HttpDelete]
         [Route("SoftDelete")]
         [Authorize(Roles = "Admin, Manager")]
