@@ -1,11 +1,9 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { ColTable } from "../../interfaces/ColTable";
-import { useToast } from "../../components/Toastify";
-import { useState } from "react";
-import {
-  getAllAssignment,
-} from "../../services/AssignmentApi";
+// import { useToast } from "../../components/Toastify";
+import { useEffect, useState } from "react";
+import { getAllAssignment } from "../../services/AssignmentApi";
 import {
   TextField,
   TableContainer,
@@ -22,7 +20,7 @@ import { getAllTree } from "../../services/TreeApi";
 import { WorkContentRes } from "../../interfaces/Response/WorkContent/WorkContentRes";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../components/Loading";
-import TreeDetails from "../../components/TreeDetails";
+// import TreeDetails from "../../components/TreeDetails";
 
 type IdToNameMap = Map<string, string>;
 
@@ -30,8 +28,8 @@ const ToDoList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const { showToast } = useToast();
-  const [usernames, setUsernames] = useState<Map<string, string>>(new Map());
+  // const { showToast } = useToast();
+  // const [usernames, setUsernames] = useState<Map<string, string>>(new Map());
   const [treenames, setTreenames] = useState<Map<string, string>>(new Map());
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -52,25 +50,25 @@ const ToDoList = () => {
     data: assignments = [],
     isLoading: assignmentLoading,
     isError: assignmentError,
-    refetch,
+    // refetch,
   } = useQuery<AssignmentRes[]>({
     queryKey: ["assignments"],
     queryFn: () => fecthTask(),
   });
 
-  const {
-    data: trees = [],
-    isLoading: treeLoading,
-    isError: treeError,
-  } = useQuery<TreeRes[]>({
-    queryKey: ["trees"],
-    queryFn: () => fetchTrees(),
-  });
+  // const {
+  //   data: trees = [],
+  //   isLoading: treeLoading,
+  //   isError: treeError,
+  // } = useQuery<TreeRes[]>({
+  //   queryKey: ["trees"],
+  //   queryFn: () => fetchTrees(),
+  // });
 
-  const getCurrentTree = (assignment: AssignmentRes) => {
-    const temp = trees.find((x) => x.id === assignment.treeId) as TreeRes;
-    return temp;
-  };
+  // const getCurrentTree = (assignment: AssignmentRes) => {
+  //   const temp = trees.find((x) => x.id === assignment.treeId) as TreeRes;
+  //   return temp;
+  // };
 
   const fetchTrees = async () => {
     const res = await getAllTree();
@@ -81,8 +79,11 @@ const ToDoList = () => {
       ])
     );
     setTreenames(treeMap);
-    return res.data;
   };
+
+  useEffect(() => {
+    fetchTrees();
+  }, []);
 
   const removeDiacritics = (text: string): string => {
     return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -96,11 +97,10 @@ const ToDoList = () => {
 
   const filteredData = assignments.filter((row) => {
     const treeName = treenames.get(row.treeId);
-    const userName = usernames.get(row.userId);
     const content = (row.workContent || []).map((wc) => wc.content).join(" ");
 
     const searchValue = removeDiacritics(
-      `${treeName} ${userName} ${content}`
+      `${treeName} ${content}`
     ).toLowerCase();
 
     return searchValue.includes(searchTerm);
@@ -187,10 +187,6 @@ const ToDoList = () => {
                           value = treenames.get(
                             row[column.map as keyof AssignmentRes] as string
                           );
-                        } else if (column.map === "userId") {
-                          value = usernames.get(
-                            row[column.map as keyof AssignmentRes] as string
-                          );
                         } else {
                           value = row[column.map as keyof AssignmentRes];
                         }
@@ -251,9 +247,8 @@ const ToDoList = () => {
       </div>
     </div>
   );
-  if ( treeLoading || assignmentLoading) return <Loading />;
-  if ( treeError || assignmentError)
-    return <div>Error loading data</div>;
+  if (assignmentLoading) return <Loading />;
+  if (assignmentError) return <div>Error loading data</div>;
 
   return <>{render}</>;
 };
