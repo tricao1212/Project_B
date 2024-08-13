@@ -28,10 +28,11 @@ import { WorkContentRes } from "../../interfaces/Response/WorkContent/WorkConten
 import EditAssignmentForm from "../../components/EditAssignmentForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Loading from "../../components/Loading";
+import TreeDetails from "../../components/TreeDetails";
 
 type IdToNameMap = Map<string, string>;
 
-const Assignments = () => {
+const AssignmentsManager = () => {
   const { token } = useSelector((state: RootState) => state.auth);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -81,6 +82,11 @@ const Assignments = () => {
     queryKey: ["trees"],
     queryFn: () => fetchTrees(),
   });
+
+  const getCurrentTree = (assignment : AssignmentRes) => {
+    const temp = trees.find((x) => x.id === assignment.treeId) as TreeRes;
+    return temp;
+  }
 
   const {
     data: users = [],
@@ -236,7 +242,17 @@ const Assignments = () => {
                                   {(value as WorkContentRes[]).map(
                                     (item, index) => (
                                       <div key={index} className="mb-1">
-                                        {index + 1}. {item.content} ({item.status === 0 ? <span className="text-red-500">onProgress</span> : <span className="text-green-500">Finished</span>})
+                                        {index + 1}. {item.content} (
+                                        {item.status === 0 ? (
+                                          <span className="text-red-500">
+                                            onProgress
+                                          </span>
+                                        ) : (
+                                          <span className="text-green-500">
+                                            Finished
+                                          </span>
+                                        )}
+                                        )
                                       </div>
                                     )
                                   )}
@@ -251,6 +267,10 @@ const Assignments = () => {
                         );
                       })}
                       <TableCell align="center">
+                        <TreeDetails
+                          tree={getCurrentTree(row)}
+                          assignments={getCurrentTree(row).assignments ?? []}
+                        />
                         <EditAssignmentForm
                           assignment={row}
                           trees={trees}
@@ -286,4 +306,4 @@ const Assignments = () => {
   return <>{render}</>;
 };
 
-export default Assignments;
+export default AssignmentsManager;

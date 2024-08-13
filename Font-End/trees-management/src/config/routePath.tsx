@@ -11,6 +11,12 @@ import TypeTrees from "../pages/admin/TypeTrees";
 import Assignments from "../pages/admin/Assignments";
 import Map from "../pages/admin/Map";
 import ResponsiveAppBar from "../pages/Test";
+import HomeManager from "../pages/manager/HomeManager";
+import Staffs from "../pages/manager/Staffs";
+import AssignmentsManager from "../pages/manager/AssignmentsManager";
+import HomeStaff from "../pages/staff/HomeStaff";
+import MapTasks from "../pages/staff/MapTasks";
+import ToDoList from "../pages/staff/ToDoList";
 
 const router = createBrowserRouter([
   {
@@ -38,8 +44,20 @@ const router = createBrowserRouter([
         element: <HomeAdmin />,
       },
       {
+        path: "manager",
+        element: <HomeManager />,
+      },
+      {
+        path: "staff",
+        element: <HomeStaff />,
+      },
+      {
         path: "users",
         element: <Users />,
+      },
+      {
+        path: "staffs",
+        element: <Staffs />,
       },
       {
         path: "trees",
@@ -54,8 +72,20 @@ const router = createBrowserRouter([
         element: <Assignments />,
       },
       {
+        path: "assignmentsManager",
+        element: <AssignmentsManager />,
+      },
+      {
+        path: "todolist",
+        element: <ToDoList />,
+      },
+      {
         path: "map",
         element: <Map />,
+      },
+      {
+        path: "mapTask",
+        element: <MapTasks />,
       },
     ],
   },

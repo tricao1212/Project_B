@@ -6,10 +6,10 @@ import MapIcon from '@mui/icons-material/Map';
 import { Aside } from "../interfaces/Aside";
 
 const asideManagerItems : Aside[] = [
-  { title: "Home", icon: <HomeIcon />, link: "" },
+  { title: "Home", icon: <HomeIcon />, link: "manager" },
   { title: "Trees", icon: <ParkIcon />, link: "trees" },
-  { title: "Staffs", icon: <PeopleIcon />, link: "users" },
-  { title: "Assignments", icon: <AssignmentIcon />, link: "assignments" },
+  { title: "Staffs", icon: <PeopleIcon />, link: "staffs" },
+  { title: "Assignments", icon: <AssignmentIcon />, link: "assignmentsManager" },
   { title: "Map", icon: <MapIcon />, link: "map" },
 ];
 

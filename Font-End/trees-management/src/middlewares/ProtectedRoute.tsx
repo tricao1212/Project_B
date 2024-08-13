@@ -15,10 +15,14 @@ const ProtectedRoute = ({ children }: protectedRouteProps) => {
     }
 
     if (user !== null) {
-      navigate("/dashboard");
+      if (user.role === 0) {
+        navigate("/dashboard");
+      } else if (user.role === 1) {
+        navigate("/dashboard/manager");
+      }else{
+        navigate("/dashboard/staff");
+      }
     }
-
-
   }, [user]);
 
   return user ? children : null;

@@ -13,6 +13,7 @@ import { Avatar, IconButton, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { getUserRoleName } from "../../utils/getUSerRole";
+import TreeMapStaff from "../staff/TreeMapStaff";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -31,6 +32,53 @@ const Home = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const fetchTreeTask = async () => {
+    const res = (await getAllTree()).data;
+    const trees = res as TreeRes[];
+    if (user) {
+      const filteredTrees = trees.filter((tree: TreeRes) => {
+        return (
+          tree.assignments?.some(
+            (assignment) => assignment.userId === user.id
+          ) ?? false
+        );
+      });
+      return filteredTrees;
+    }
+    return [];
+  };
+
+  const fetchTree = async () => {
+    const res = (await getAllTree()).data;
+    const trees = res as TreeRes[];
+    if (user) {
+      const filteredTrees = trees.filter((tree: TreeRes) => {
+        return !tree.assignments?.some(
+          (assignment) => assignment.userId === user.id
+        );
+      });
+      return filteredTrees;
+    }
+    return [];
+  };
+
+  const {
+    data: treesTask = [],
+    isLoading: taskLoading,
+    isError: taskError,
+  } = useQuery<TreeRes[]>({
+    queryKey: ["treesTask"],
+    queryFn: () => fetchTreeTask(),
+  });
+
+  const {
+    data: treesStaff = [],
+    isLoading: staffLoading,
+    isError: staffError,
+  } = useQuery<TreeRes[]>({
+    queryKey: ["treesStaff"],
+    queryFn: () => fetchTree(),
+  });
 
   const {
     data: trees = [],
@@ -82,15 +130,13 @@ const Home = () => {
               <div className="flex flex-row items-start">
                 <div>
                   <h2 className="font-bold text-lg">{user.fullName}</h2>
-                  <h2 className="text-base">
-                    {getUserRoleName(user.role)}
-                  </h2>
+                  <h2 className="text-base">{getUserRoleName(user.role)}</h2>
                 </div>
                 <IconButton
                   onClick={handleClick}
                   size="large"
-                  disabled={!isSmallScreen} // Disables the button on medium and larger screens
-                  sx={{ pointerEvents: !isSmallScreen ? "none" : "auto" }} // Disables click events on larger screens
+                  disabled={!isSmallScreen}
+                  sx={{ pointerEvents: !isSmallScreen ? "none" : "auto" }}
                 >
                   <Avatar
                     alt="avatar"
@@ -127,13 +173,24 @@ const Home = () => {
             </>
           )}
         </header>
-        <TreeMap
-          initialTrees={trees}
-          areaCenter={[11.052829, 106.666128]} // Center of EIU
-          areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
-          minZoom={17}
-          maxZoom={18}
-        />
+        {user?.role === 2 ? (
+          <TreeMapStaff
+            initialTrees={treesStaff}
+            taskTrees={treesTask}
+            areaCenter={[11.052829, 106.666128]} // Center of EIU
+            areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
+            minZoom={17}
+            maxZoom={18}
+          />
+        ) : (
+          <TreeMap
+            initialTrees={trees}
+            areaCenter={[11.052829, 106.666128]} // Center of EIU
+            areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
+            minZoom={17}
+            maxZoom={18}
+          />
+        )}
       </div>
       <footer className="container mx-auto p-5 bg-green-100 rounded-t-lg">
         <div className="mx-auto flex flex-col md:flex-row">
@@ -164,9 +221,9 @@ const Home = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || staffLoading || taskLoading ? (
         <Loading />
-      ) : isError ? (
+      ) : isError || staffError || taskError ? (
         <div>Error, please try again</div>
       ) : (
         render

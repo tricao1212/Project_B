@@ -41,6 +41,7 @@ interface ActionProps {
 interface TextField {
   id: number;
   value: string;
+  status: number;
 }
 
 export default function EditAssignmentForm({
@@ -108,7 +109,7 @@ export default function EditAssignmentForm({
       const newWorkContents: WorkContentReq[] = req.map((field) => ({
         id: null,
         content: field.value,
-        status: 0,
+        status: field.status,
       }));
 
       const assignmentReq: AssignmentReq = {
@@ -132,6 +133,7 @@ export default function EditAssignmentForm({
     const newField: TextField = {
       id: fields.length > 0 ? fields[fields.length - 1].id + 1 : 1,
       value: "",
+      status: 0,
     };
     setFields([...fields, newField]);
   };
@@ -165,6 +167,7 @@ export default function EditAssignmentForm({
       const initialFields = (assignment.workContent || []).map((wc, index) => ({
         id: index + 1,
         value: wc.content,
+        status: wc.status
       }));
       setFields(initialFields);
     }
