@@ -39,7 +39,7 @@ const TypeTrees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { showToast } = useToast();
 
-  const columns: ColTable[] = [{ title: "Type", map: "name" }];
+  const columns: ColTable[] = [{ title: "Specie name", map: "name" }];
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -73,7 +73,7 @@ const TypeTrees = () => {
       }
     },
     onError: (error) => {
-      showToast(error.message || "Failed to delete type", "error");
+      showToast(error.message || "Failed to create specie", "error");
     },
   });
 
@@ -98,7 +98,7 @@ const TypeTrees = () => {
       }
     },
     onError: (error) => {
-      showToast(error.message || "Failed to delete type", "error");
+      showToast(error.message || "Failed to delete specie", "error");
     },
   });
 
@@ -111,13 +111,11 @@ const TypeTrees = () => {
   };
 
   const filteredData = types.filter((row) => {
-    return columns.some((column) => {
-      const value = row[column.map as keyof TypeTreeRes];
-      const cleanValue = value
-        ? removeDiacritics(value.toString()).toLowerCase()
-        : "";
-      return value ? cleanValue.includes(searchTerm.toLowerCase()) : false;
-    });
+    const searchValue = removeDiacritics(
+      `${row.name}`
+    ).toLowerCase();
+    const matchesSearchTerm = searchValue.includes(searchTerm);
+    return matchesSearchTerm;
   });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -134,9 +132,9 @@ const TypeTrees = () => {
   const render = (
     <div className="container mx-auto">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Type Tree Management</h1>
+        <h1 className="text-2xl font-bold">Species Management</h1>
         <Button variant="outlined" onClick={handleClickOpen}>
-          Add new type
+          Add new specie
         </Button>
         <Dialog
           fullWidth
@@ -147,7 +145,7 @@ const TypeTrees = () => {
             onSubmit: handleFormSubmit,
           }}
         >
-          <DialogTitle>Add new type</DialogTitle>
+          <DialogTitle>Add new specie</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -182,7 +180,7 @@ const TypeTrees = () => {
         <TableContainer
           sx={{
             maxHeight: 500,
-            border: "1px solid grey",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             borderRadius: "10px",
           }}
         >
@@ -196,7 +194,7 @@ const TypeTrees = () => {
                 {columns.map((column) => (
                   <TableCell
                     key={column.title}
-                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                     className="uppercase"
                     align="center"
                   >
@@ -204,7 +202,14 @@ const TypeTrees = () => {
                   </TableCell>
                 ))}
                 <TableCell
-                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
+                  align="center"
+                  className="uppercase"
+                >
+                  Total trees
+                </TableCell>
+                <TableCell
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                   align="center"
                   className="uppercase"
                 >
@@ -235,6 +240,11 @@ const TypeTrees = () => {
                           </TableCell>
                         );
                       })}
+                      <TableCell align="center">
+                        <div className="flex justify-center items-center text-orange-400">
+                          {row.listTrees.length}
+                        </div>
+                      </TableCell>
                       <TableCell align="center">
                         <EditTypeTreeDialogForm
                           type={row}

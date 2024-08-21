@@ -65,6 +65,7 @@ export default function EditAssignmentForm({
   const [fields, setFields] = React.useState<TextField[]>([]);
   const [error, setError] = React.useState("");
   const [errorWork, setErrorWork] = React.useState("");
+  const [errorDate, setErrorDate] = React.useState("");
 
   const staffs = users.filter((staff) => staff.role == 2);
 
@@ -82,6 +83,15 @@ export default function EditAssignmentForm({
     setSelectedUser(event.target.value);
   };
 
+  const formatDateToInputValue = (date: Date | null) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const iconMarkup = renderToStaticMarkup(
     <FontAwesomeIcon
       icon={faTree}
@@ -96,9 +106,15 @@ export default function EditAssignmentForm({
     popupAnchor: [0, -24],
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (dl : Date) => {
+    const now = Date.now();
+    const dlTimestamp = dl.getTime();
     if (selectedTree === null) {
       setError("Please choose tree!!!");
+    }
+    if (dlTimestamp < now) {
+      setErrorDate("Dealine can not expired");
+      return;
     }
     if (fields.length === 0) {
       setErrorWork("Please input work to do!!!");
@@ -116,6 +132,7 @@ export default function EditAssignmentForm({
         treeId: selectedTree.id,
         userId: selectedUser,
         workContent: newWorkContents,
+        deadLine : dl
       };
 
       var res = await updateAssignment(assignment.id, assignmentReq, token);
@@ -167,7 +184,7 @@ export default function EditAssignmentForm({
       const initialFields = (assignment.workContent || []).map((wc, index) => ({
         id: index + 1,
         value: wc.content,
-        status: wc.status
+        status: wc.status,
       }));
       setFields(initialFields);
     }
@@ -186,7 +203,9 @@ export default function EditAssignmentForm({
           component: "form",
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            handleSubmit();
+            const formData = new FormData(event.currentTarget);
+            const deadline = new Date(formData.get("deadLine") as string);
+            handleSubmit(deadline);
           },
         }}
       >
@@ -240,7 +259,22 @@ export default function EditAssignmentForm({
           >
             Select tree to add assignment
           </Button>
-
+          <TextField
+            autoFocus
+            margin="dense"
+            id="deadLine"
+            name="deadLine"
+            label="Deadline"
+            type="date"
+            fullWidth
+            error={!!errorDate}
+            helperText={errorDate}
+            defaultValue={formatDateToInputValue(assignment.deadLine)}
+            variant="standard"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
           <div className="mt-5">
             <h1 className="font-bold">List works to do:</h1>
             <p className="text-red-500">{errorWork !== "" ? errorWork : ""}</p>

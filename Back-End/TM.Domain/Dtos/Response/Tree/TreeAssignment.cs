@@ -8,5 +8,7 @@ namespace TM.Domain.Dtos.Response.Tree
         public string UserId { get; set; } = null!;
         public List<WorkContentRes>? WorkContent { get; set; } = new List<WorkContentRes>();
         public string? CreatedBy { get; set; }
+        public DateTime DeadLine { get; set; }
+        public bool IsRequest {  get; set; }
     }
 }

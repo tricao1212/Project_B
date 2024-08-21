@@ -27,6 +27,24 @@ namespace TreesManagement.API.Controllers
             return StatusCode((int)res.StatusCode, res);
         }
 
+        [HttpGet]
+        [Route("GetHistory")]
+        [Authorize]
+        public async Task<IActionResult> GetHistory()
+        {
+            var res = await _assignmentService.GetHistory();
+            return StatusCode((int)res.StatusCode, res);
+        }
+
+        [HttpPost]
+        [Route("SendRequest")]
+        [Authorize]
+        public async Task<IActionResult> SendRequest(string Id)
+        {
+            var res = await _assignmentService.RequestConfirm(Id);
+            return StatusCode((int)res.StatusCode, res);
+        }
+
         [HttpPost]
         [Route("GetById")]
         public async Task<IActionResult> GetById(string Id)
@@ -50,15 +68,6 @@ namespace TreesManagement.API.Controllers
         public async Task<IActionResult> Update(string Id, AssignmentReq asignment)
         {
             var res = await _assignmentService.UpdateAsync(Id, asignment);
-            return StatusCode((int)res.StatusCode, res);
-        }
-
-        [HttpPut]
-        [Route("UpdateStatus")]
-        [Authorize]
-        public async Task<IActionResult> UpdateStatus(string Id, AssignmentReq asignment)
-        {
-            var res = await _assignmentService.UpdateStatus(Id, asignment);
             return StatusCode((int)res.StatusCode, res);
         }
 

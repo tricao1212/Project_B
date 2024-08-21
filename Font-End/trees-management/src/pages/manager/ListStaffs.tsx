@@ -4,6 +4,8 @@ import { RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { ColTable } from "../../interfaces/ColTable";
 import {
+  Avatar,
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -13,64 +15,49 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
-import DeleteConfirm from "../../components/DeleteConfirm";
-import { useToast } from "../../components/Toastify";
 import { UserRes } from "../../interfaces/Response/User/UserRes";
-import { deleteUser, getAllUser } from "../../services/UserApi";
-import AddUserDialogForm from "../../components/AddUserDialogForm";
-import EditUserDialogForm from "../../components/EditUserDialogForm";
+import { getAllUser } from "../../services/UserApi";
 import { formatDateOnly } from "../../utils/formatDate";
 import { getUserRoleName } from "../../utils/getUSerRole";
-import { Role } from "../../interfaces/Enum/Role";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import StaffDetails from "../../components/StaffDetails";
 
-const Staffs = () => {
+const ListStaffs = () => {
   const { token } = useSelector((state: RootState) => state.auth);
-  const { showToast } = useToast();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [staffAvailable, setStaffAvailable] = useState<number>(0);
+  const [busyStaff, setBusyStaff] = useState<number>(0);
 
   const columns: ColTable[] = [
     { title: "Avatar", map: "avatar" },
     { title: "Full Name", map: "fullName" },
     { title: "Phone", map: "phone" },
     { title: "Date Of Birth", map: "dob" },
-    { title: "Role", map: "role" },
   ];
 
   const fetchStaff = async () => {
     const res = (await getAllUser(token)).data;
     const temp = res.filter((staff: UserRes) => staff.role === 2);
+    let a = 0;
+    let b = 0;
+    temp.filter((s: UserRes) =>
+      s.assignments.length > 0 ? (b = b + 1) : (a = a + 1)
+    );
+    setStaffAvailable(a);
+    setBusyStaff(b);
     return temp;
   };
-  
-  const queryClient = useQueryClient();
-  
+
   const {
     data: staffs = [],
     isLoading,
     isError,
-    refetch,
   } = useQuery<UserRes[]>({
     queryKey: ["staffs"],
     queryFn: () => fetchStaff(),
-  });
-
-
-  const mutation = useMutation({
-    mutationFn: async (userId: string) => await deleteUser(userId, token),
-    onSuccess: async (data) => {
-      if (data.isSuccess) {
-        await queryClient.invalidateQueries({ queryKey: ["users"] });
-        showToast("Successful!", "success");
-      } else {
-        showToast(data.message, "error");
-      }
-    },
-    onError: (error) => {
-      showToast(error.message || "Failed to delete user", "error");
-    },
   });
 
   const removeDiacritics = (text: string): string => {
@@ -78,17 +65,25 @@ const Staffs = () => {
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(removeDiacritics(event.target.value));
+    setSearchTerm(removeDiacritics(event.target.value).toLowerCase());
+  };
+
+  const handleFilter = (type: string) => {
+    setFilterType(type);
+    setPage(0); // Reset page when filter changes
   };
 
   const filteredData = staffs.filter((row) => {
-    return columns.some((column) => {
-      const value = row[column.map as keyof UserRes];
-      const cleanValue = value
-        ? removeDiacritics(value.toString()).toLowerCase()
-        : "";
-      return value ? cleanValue.includes(searchTerm.toLowerCase()) : false;
-    });
+    const searchValue = removeDiacritics(
+      `${row.fullName} ${row.dob} ${row.phone} ${getUserRoleName(row.role)}`
+    ).toLowerCase();
+    const matchesSearchTerm = searchValue.includes(searchTerm);
+    const matchesFilterType =
+      filterType === "all" ||
+      (filterType === "available" && row.assignments.length === 0) ||
+      (filterType === "staffBusy" && row.assignments.length > 0);
+
+    return matchesSearchTerm && matchesFilterType;
   });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -105,8 +100,7 @@ const Staffs = () => {
   const render = (
     <div className="container mx-auto">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Users Management</h1>
-        <AddUserDialogForm handleFecth={refetch} />
+        <h1 className="text-2xl font-bold">List Staffs</h1>
       </div>
       <div>
         <div className="mx-auto mb-4">
@@ -118,10 +112,84 @@ const Staffs = () => {
             fullWidth
           />
         </div>
+        <div className="flex flex-col lg:flex-row space-y-2 lg:space-x-2 my-5">
+          <div></div>
+          <Button
+            sx={{
+              backgroundColor: filterType === "all" ? "yellow" : "transparent",
+              color: filterType === "all" ? "black" : "inherit",
+              border: "1px solid",
+              borderColor: "currentColor",
+              borderRadius: "0.25rem",
+              "&:hover": {
+                backgroundColor:
+                  filterType === "all" ? "darkyellow" : "transparent",
+              },
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem", // Consistent spacing between text and the counter
+            }}
+            size="small"
+            onClick={() => handleFilter("all")}
+          >
+            All staffs{" "}
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-orange-300 text-white text-sm">
+              {staffs.length}
+            </span>
+          </Button>
+          <Button
+            sx={{
+              backgroundColor:
+                filterType === "available" ? "yellow" : "transparent",
+              color: filterType === "available" ? "black" : "inherit",
+              border: "1px solid",
+              borderColor: "currentColor",
+              borderRadius: "0.25rem",
+              "&:hover": {
+                backgroundColor:
+                  filterType === "available" ? "darkyellow" : "transparent",
+              },
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem", // Consistent spacing between text and the counter
+            }}
+            size="small"
+            onClick={() => handleFilter("available")}
+          >
+            Available staffs{" "}
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-300 text-white text-sm">
+              {staffAvailable}
+            </span>
+          </Button>
+          <Button
+            sx={{
+              backgroundColor:
+                filterType === "staffBusy" ? "yellow" : "transparent",
+              color: filterType === "staffBusy" ? "black" : "inherit",
+              border: "1px solid",
+              borderColor: "currentColor",
+              borderRadius: "0.25rem",
+              "&:hover": {
+                backgroundColor:
+                  filterType === "staffBusy" ? "darkyellow" : "transparent",
+              },
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem", // Consistent spacing between text and the counter
+            }}
+            size="small"
+            onClick={() => handleFilter("staffBusy")}
+          >
+            Busy staffs{" "}
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-300 text-white text-sm">
+              {busyStaff}
+            </span>
+          </Button>
+        </div>
         <TableContainer
           sx={{
             maxHeight: 500,
-            border: "1px solid grey",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             borderRadius: "10px",
           }}
         >
@@ -135,7 +203,7 @@ const Staffs = () => {
                 {columns.map((column) => (
                   <TableCell
                     key={column.title}
-                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                     className="uppercase"
                     align="center"
                   >
@@ -143,11 +211,11 @@ const Staffs = () => {
                   </TableCell>
                 ))}
                 <TableCell
-                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
-                  align="center"
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                   className="uppercase"
+                  align="center"
                 >
-                  Actions
+                  Information
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -156,12 +224,7 @@ const Staffs = () => {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, rowindex) => {
                   return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={rowindex}
-                    >
+                    <TableRow hover tabIndex={-1} key={rowindex}>
                       {columns.map((column) => {
                         let value;
 
@@ -170,10 +233,6 @@ const Staffs = () => {
                           temp
                             ? (value = formatDateOnly(new Date(temp)))
                             : (value = row[column.map as keyof UserRes]);
-                        } else if (column.map === "role") {
-                          value = getUserRoleName(
-                            row[column.map as keyof UserRes] as Role
-                          );
                         } else {
                           value = row[column.map as keyof UserRes];
                         }
@@ -182,14 +241,15 @@ const Staffs = () => {
                           <TableCell key={column.map} align="center">
                             <div className="flex justify-center items-center">
                               {column.map === "avatar" ? (
-                                <img
+                                <Avatar
+                                  alt="avatar"
                                   src={
-                                    value
-                                      ? `http://localhost:2024/images/${value}`
+                                    row.avatar
+                                      ? "http://localhost:2024/images/" +
+                                        row.avatar
                                       : ""
                                   }
-                                  alt={`${value} image`}
-                                  className="w-36 h-20"
+                                  sx={{ width: 56, height: 56 }}
                                 />
                               ) : value ? (
                                 value.toString()
@@ -201,10 +261,7 @@ const Staffs = () => {
                         );
                       })}
                       <TableCell align="center">
-                        <EditUserDialogForm user={row} handleFetch={refetch} />
-                        <DeleteConfirm
-                          handleDelete={() => mutation.mutate(row.id)}
-                        />
+                        <StaffDetails user={row} />
                       </TableCell>
                     </TableRow>
                   );
@@ -238,4 +295,4 @@ const Staffs = () => {
   );
 };
 
-export default Staffs;
+export default ListStaffs;

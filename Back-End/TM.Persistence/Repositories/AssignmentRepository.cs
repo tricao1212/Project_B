@@ -17,6 +17,14 @@ namespace TM.Persistence.Repositories
                                .ToListAsync();
         }
 
+        public async Task<IEnumerable<Assignment>> GetAllDeletedAsync()
+        {
+            return await _dbSet.Include(x => x.WorkContent.Where(w => w.IsDeleted == false))
+                               .AsNoTracking()
+                               .Where(x => x.IsDeleted == true)
+                               .ToListAsync();
+        }
+
         public override async Task<IEnumerable<Assignment>> FindAllAsync()
         {
             return await _dbSet.Include(x => x.WorkContent.Where(w => w.IsDeleted == false))
@@ -35,7 +43,6 @@ namespace TM.Persistence.Repositories
         public override async Task<Assignment?> FindByIdAsync(string id)
         {
             return await _dbSet.Include(x => x.WorkContent.Where(w => w.IsDeleted == false))
-                               .Where(x => x.IsDeleted == false)
                                .FirstOrDefaultAsync(x => x.Id == id);
         }
 

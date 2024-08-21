@@ -43,6 +43,8 @@ builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITypeTreeService, TypeTreeService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<IWorkContentService, WorkContentService>();
+
 
 builder.Services.AddAuthentication(options =>
 {

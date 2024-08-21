@@ -5,6 +5,9 @@ interface UserAssignment {
   treeId: string;
   workContent: WorkContentRes[];
   createdBy: string;
+  deadLine: Date;
+  isRequest: boolean;
+  progress: number;
 }
 
 export type { UserAssignment };

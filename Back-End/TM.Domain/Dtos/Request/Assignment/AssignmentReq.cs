@@ -13,5 +13,11 @@ namespace TM.Domain.Dtos.Request.Assignment
 
         [Required]
         public List<WorkContentReq> WorkContent { get; set; } = new List<WorkContentReq>();
+
+        public DateTime DeadLine { get; set; }
+
+        public bool? IsRequest { get; set; }
+
+        public DateTime? FinishedAt { get; set; }
     }
 }

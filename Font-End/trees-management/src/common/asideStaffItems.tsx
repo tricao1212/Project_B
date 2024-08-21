@@ -6,9 +6,9 @@ import { Aside } from "../interfaces/Aside";
 
 const asideStaffItems : Aside[] = [
   { title: "Home", icon: <HomeIcon />, link: "staff" },
-  { title: "Trees", icon: <ParkIcon />, link: "trees" },
+  { title: "List trees", icon: <ParkIcon />, link: "listtrees" },
   { title: "To do list", icon: <AssignmentIcon />, link: "todolist" },
-  { title: "Map for tasks", icon: <MapIcon />, link: "mapTask" },
+  { title: "Map", icon: <MapIcon />, link: "mapTask" },
 ];
 
 export { asideStaffItems };

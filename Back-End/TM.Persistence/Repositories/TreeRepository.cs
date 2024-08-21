@@ -13,7 +13,7 @@ namespace TM.Persistence.Repositories
         }
         public override async Task<IEnumerable<Tree>> GetAllAsync()
         {
-            var trees = await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+            var trees = await _dbSet.Include(x => x.Assignments.Where(y => y.IsDeleted == false)).ThenInclude(u => u.WorkContent)
                                .Include(x => x.Position)
                                .Include(x => x.TypeTree)
                                .AsNoTracking()
@@ -40,7 +40,7 @@ namespace TM.Persistence.Repositories
 
         public override async Task<Tree?> GetByIdAsync(string id)
         {
-            return await _dbSet.Include(x => x.Assignments).ThenInclude(u => u.WorkContent)
+            return await _dbSet.Include(x => x.Assignments.Where(y => y.IsDeleted == false)).ThenInclude(u => u.WorkContent)
                                .Include(x => x.Position)
                                .Include(x => x.TypeTree)
                                .AsNoTracking()

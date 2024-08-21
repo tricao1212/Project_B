@@ -20,7 +20,9 @@ import { getAllTree } from "../../services/TreeApi";
 import { WorkContentRes } from "../../interfaces/Response/WorkContent/WorkContentRes";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../components/Loading";
-// import TreeDetails from "../../components/TreeDetails";
+import { formatDateOnly, formatDateTime } from "../../utils/formatDate";
+import UpdateStatusTask from "../../components/UpdateStatusTask";
+import SendRequestConfirm from "../../components/SendRequestConfirm";
 
 type IdToNameMap = Map<string, string>;
 
@@ -28,14 +30,19 @@ const ToDoList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  // const { showToast } = useToast();
-  // const [usernames, setUsernames] = useState<Map<string, string>>(new Map());
   const [treenames, setTreenames] = useState<Map<string, string>>(new Map());
   const { user } = useSelector((state: RootState) => state.auth);
+  const [currentTree, setCurrentTree] = useState<Map<string, string>>(
+    new Map()
+  );
+  const now = Date.now();
 
   const columns: ColTable[] = [
     { title: "Tree", map: "treeId" },
     { title: "List works", map: "workContent" },
+    { title: "Created By", map: "createdBy" },
+    { title: "Created At", map: "createdAt" },
+    { title: "Deadline", map: "deadLine" },
   ];
 
   const fecthTask = async () => {
@@ -50,25 +57,11 @@ const ToDoList = () => {
     data: assignments = [],
     isLoading: assignmentLoading,
     isError: assignmentError,
-    // refetch,
+    refetch,
   } = useQuery<AssignmentRes[]>({
     queryKey: ["assignments"],
     queryFn: () => fecthTask(),
   });
-
-  // const {
-  //   data: trees = [],
-  //   isLoading: treeLoading,
-  //   isError: treeError,
-  // } = useQuery<TreeRes[]>({
-  //   queryKey: ["trees"],
-  //   queryFn: () => fetchTrees(),
-  // });
-
-  // const getCurrentTree = (assignment: AssignmentRes) => {
-  //   const temp = trees.find((x) => x.id === assignment.treeId) as TreeRes;
-  //   return temp;
-  // };
 
   const fetchTrees = async () => {
     const res = await getAllTree();
@@ -78,7 +71,12 @@ const ToDoList = () => {
         tree.name + " " + "(" + tree.treeCode + ")",
       ])
     );
+    const treeMap1: IdToNameMap = new Map(
+      res.data.map((tree: TreeRes) => [tree.id, tree.image])
+    );
     setTreenames(treeMap);
+    setCurrentTree(treeMap1);
+    return res.data;
   };
 
   useEffect(() => {
@@ -135,7 +133,7 @@ const ToDoList = () => {
         <TableContainer
           sx={{
             maxHeight: 500,
-            border: "1px solid grey",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             borderRadius: "10px",
           }}
         >
@@ -146,10 +144,17 @@ const ToDoList = () => {
           >
             <TableHead>
               <TableRow>
+                <TableCell
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
+                  align="center"
+                  className="uppercase"
+                >
+                  Image
+                </TableCell>
                 {columns.map((column) => (
                   <TableCell
                     key={column.title}
-                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                     className="uppercase"
                     align="center"
                   >
@@ -157,7 +162,7 @@ const ToDoList = () => {
                   </TableCell>
                 ))}
                 <TableCell
-                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                   align="center"
                   className="uppercase"
                 >
@@ -176,6 +181,17 @@ const ToDoList = () => {
                       tabIndex={-1}
                       key={rowindex}
                     >
+                      <TableCell align="center">
+                        <div className="flex justify-center items-center">
+                          <img
+                            src={`http://localhost:2024/images/${currentTree.get(
+                              row.treeId
+                            )}`}
+                            alt={`image`}
+                            className="w-36 h-20 rounded"
+                          />
+                        </div>
+                      </TableCell>
                       {columns.map((column) => {
                         let value;
 
@@ -185,6 +201,16 @@ const ToDoList = () => {
                           ] as WorkContentRes[];
                         } else if (column.map === "treeId") {
                           value = treenames.get(
+                            row[column.map as keyof AssignmentRes] as string
+                          );
+                        } else if (column.map === "createdAt") {
+                          value = formatDateTime(
+                            new Date(
+                              row[column.map as keyof AssignmentRes] as string
+                            )
+                          );
+                        } else if (column.map === "deadLine") {
+                          value = new Date(
                             row[column.map as keyof AssignmentRes] as string
                           );
                         } else {
@@ -199,23 +225,34 @@ const ToDoList = () => {
                                   {(value as WorkContentRes[]).map(
                                     (item, index) => (
                                       <div key={index} className="mb-1">
-                                        {index + 1}. {item.content} (
+                                        {index + 1}. {item.content}{" "}
                                         {item.status === 0 ? (
-                                          <span className="text-red-500">
+                                          <span className="text-blue-500 bg-blue-200 rounded-xl p-1 px-2">
                                             onProgress
                                           </span>
                                         ) : (
-                                          <span className="text-green-500">
+                                          <span className="text-green-500 bg-green-200 rounded-xl p-1 px-2">
                                             Finished
                                           </span>
                                         )}
-                                        )
                                       </div>
                                     )
                                   )}
                                 </div>
                               ) : value ? (
-                                value.toString()
+                                column.map === "deadLine" ? (
+                                  <span
+                                    className={
+                                      (value as Date).getTime() < now
+                                        ? "text-red-500"
+                                        : "text-blue-500"
+                                    }
+                                  >
+                                    {formatDateOnly(value as Date)}
+                                  </span>
+                                ) : (
+                                  value.toString()
+                                )
                               ) : (
                                 "-"
                               )}
@@ -224,10 +261,23 @@ const ToDoList = () => {
                         );
                       })}
                       <TableCell align="center">
-                        {/* <TreeDetails
-                          tree={getCurrentTree(row)}
-                          assignments={getCurrentTree(row).assignments ?? []}
-                        /> */}
+                        {new Date(row.deadLine).getTime() > now ? (
+                          row.isRequest ? (
+                            "waiting for confirmation"
+                          ) : row.workContent.every((x) => x.status === 1) ? (
+                            <SendRequestConfirm
+                              assignmentId={row.id}
+                              handleFetch={refetch}
+                            />
+                          ) : (
+                            <UpdateStatusTask
+                              assignment={row}
+                              handleFetch={refetch}
+                            />
+                          )
+                        ) : (
+                          ""
+                        )}
                       </TableCell>
                     </TableRow>
                   );

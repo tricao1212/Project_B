@@ -4,6 +4,12 @@ import { RootState } from "../../redux/store";
 import Loading from "../../components/Loading";
 import { ColTable } from "../../interfaces/ColTable";
 import {
+  Avatar,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -16,13 +22,13 @@ import {
 import DeleteConfirm from "../../components/DeleteConfirm";
 import { useToast } from "../../components/Toastify";
 import { UserRes } from "../../interfaces/Response/User/UserRes";
-import { deleteUser, getAllUser } from "../../services/UserApi";
+import { deleteUser, useAllUserData } from "../../services/UserApi";
 import AddUserDialogForm from "../../components/AddUserDialogForm";
 import EditUserDialogForm from "../../components/EditUserDialogForm";
 import { formatDateOnly } from "../../utils/formatDate";
 import { getUserRoleName } from "../../utils/getUSerRole";
 import { Role } from "../../interfaces/Enum/Role";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Users = () => {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -31,6 +37,18 @@ const Users = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
 
+  //search by role
+  const [selectedRole, setSelectedRole] = useState<string>("");
+
+  const handleRoleChange = (event: SelectChangeEvent<string>) => {
+    setSelectedRole(event.target.value as string);
+  };
+
+  const roleValues: string[] = Object.keys(Role).filter((key) =>
+    isNaN(Number(key))
+  );
+  //
+
   const columns: ColTable[] = [
     { title: "Avatar", map: "avatar" },
     { title: "Full Name", map: "fullName" },
@@ -38,19 +56,15 @@ const Users = () => {
     { title: "Date Of Birth", map: "dob" },
     { title: "Role", map: "role" },
   ];
-  
+
   const queryClient = useQueryClient();
-  
+
   const {
     data: users = [],
     isLoading,
     isError,
     refetch,
-  } = useQuery<UserRes[]>({
-    queryKey: ["users"],
-    queryFn: () => getAllUser(token).then((res) => res.data),
-  });
-
+  } = useAllUserData(token);
 
   const mutation = useMutation({
     mutationFn: async (userId: string) => await deleteUser(userId, token),
@@ -76,13 +90,14 @@ const Users = () => {
   };
 
   const filteredData = users.filter((row) => {
-    return columns.some((column) => {
-      const value = row[column.map as keyof UserRes];
-      const cleanValue = value
-        ? removeDiacritics(value.toString()).toLowerCase()
-        : "";
-      return value ? cleanValue.includes(searchTerm.toLowerCase()) : false;
-    });
+    const searchValue = removeDiacritics(
+      `${row.fullName} ${row.dob} ${row.phone} ${getUserRoleName(row.role)}`
+    ).toLowerCase();
+    const matchesSearchTerm = searchValue.includes(searchTerm);
+    const role =
+      selectedRole === "" ? true : selectedRole === getUserRoleName(row.role);
+
+    return matchesSearchTerm && role;
   });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -103,19 +118,34 @@ const Users = () => {
         <AddUserDialogForm handleFecth={refetch} />
       </div>
       <div>
-        <div className="mx-auto mb-4">
+        <div className="mb-4 space-y-4 sm:space-y-0 sm:flex sm:space-x-5">
           <TextField
             label="Search"
             variant="outlined"
             value={searchTerm}
             onChange={handleSearch}
-            fullWidth
           />
+          <FormControl sx={{ width: 300 }}>
+            <InputLabel>Search by role</InputLabel>
+            <Select
+              value={selectedRole}
+              onChange={handleRoleChange}
+              label="Selecet by role"
+              variant="outlined"
+            >
+              <MenuItem value="">-</MenuItem>
+              {roleValues.map((role, index) => (
+                <MenuItem key={index} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <TableContainer
           sx={{
             maxHeight: 500,
-            border: "1px solid grey",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             borderRadius: "10px",
           }}
         >
@@ -129,7 +159,7 @@ const Users = () => {
                 {columns.map((column) => (
                   <TableCell
                     key={column.title}
-                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                     className="uppercase"
                     align="center"
                   >
@@ -137,7 +167,7 @@ const Users = () => {
                   </TableCell>
                 ))}
                 <TableCell
-                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                   align="center"
                   className="uppercase"
                 >
@@ -176,14 +206,15 @@ const Users = () => {
                           <TableCell key={column.map} align="center">
                             <div className="flex justify-center items-center">
                               {column.map === "avatar" ? (
-                                <img
+                                <Avatar
+                                  alt="avatar"
                                   src={
-                                    value
-                                      ? `http://localhost:2024/images/${value}`
+                                    row.avatar
+                                      ? "http://localhost:2024/images/" +
+                                        row.avatar
                                       : ""
                                   }
-                                  alt={`${value} image`}
-                                  className="w-36 h-20"
+                                  sx={{ width: 56, height: 56 }}
                                 />
                               ) : value ? (
                                 value.toString()
@@ -196,9 +227,13 @@ const Users = () => {
                       })}
                       <TableCell align="center">
                         <EditUserDialogForm user={row} handleFetch={refetch} />
-                        <DeleteConfirm
-                          handleDelete={() => mutation.mutate(row.id)}
-                        />
+                        {row.role === 0 ? (
+                          ""
+                        ) : (
+                          <DeleteConfirm
+                            handleDelete={() => mutation.mutate(row.id)}
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   );

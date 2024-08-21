@@ -12,7 +12,7 @@ namespace TM.Domain.Entity
         [Required]
         public string Password { get; set; } = null!;
 
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = null!;
 
         [Phone]
         public string? Phone { get; set; }

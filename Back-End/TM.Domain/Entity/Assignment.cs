@@ -18,6 +18,14 @@ namespace TM.Domain.Entity
 
         public virtual User User { get; set; } = null!;
 
+        public DateTime DeadLine { get; set; }
+
+        public bool IsRequest { get; set; } = false;
+
+        public DateTime? FinishedAt { get; set; }
+
+        public int Progress { get; set; } = 0;
+
         public ICollection<WorkContent> WorkContent { get; set; } = new List<WorkContent>();
     }
 }

@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { getUserRoleName } from "../../utils/getUSerRole";
 import TreeMapStaff from "../staff/TreeMapStaff";
+import TreeMapManager from "../manager/TreeMapManager";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -32,16 +33,20 @@ const Home = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  
   const fetchTreeTask = async () => {
     const res = (await getAllTree()).data;
     const trees = res as TreeRes[];
     if (user) {
       const filteredTrees = trees.filter((tree: TreeRes) => {
-        return (
-          tree.assignments?.some(
+        if (tree.assignments) {
+          // Filter assignments by userId and isConfirm
+          const matchingAssignments = tree.assignments.filter(
             (assignment) => assignment.userId === user.id
-          ) ?? false
-        );
+          );
+          return matchingAssignments.length > 0;
+        }
+        return false;
       });
       return filteredTrees;
     }
@@ -53,10 +58,12 @@ const Home = () => {
     const trees = res as TreeRes[];
     if (user) {
       const filteredTrees = trees.filter((tree: TreeRes) => {
-        return !tree.assignments?.some(
-          (assignment) => assignment.userId === user.id
+        return tree.assignments?.every(
+          (assignment) =>
+            assignment.userId !== user.id
         );
       });
+      console.log(filteredTrees);
       return filteredTrees;
     }
     return [];
@@ -66,6 +73,7 @@ const Home = () => {
     data: treesTask = [],
     isLoading: taskLoading,
     isError: taskError,
+    refetch,
   } = useQuery<TreeRes[]>({
     queryKey: ["treesTask"],
     queryFn: () => fetchTreeTask(),
@@ -177,6 +185,20 @@ const Home = () => {
           <TreeMapStaff
             initialTrees={treesStaff}
             taskTrees={treesTask}
+            handleFetch={refetch}
+            areaCenter={[11.052829, 106.666128]} // Center of EIU
+            areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
+            minZoom={17}
+            maxZoom={18}
+          />
+        ) : user?.role === 1 ? (
+          <TreeMapManager
+            initialTrees={trees.filter((t) =>
+              t.assignments?.length ? false : true
+            )}
+            taskTrees={trees.filter((t) =>
+              t.assignments?.length ? true : false
+            )}
             areaCenter={[11.052829, 106.666128]} // Center of EIU
             areaSize={[0.007, 0.007]} // Approximately 11km x 11km at this latitude
             minZoom={17}

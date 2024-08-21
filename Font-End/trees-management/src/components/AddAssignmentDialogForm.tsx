@@ -60,7 +60,7 @@ export default function AddAssignmentDialogForm({
   const [fields, setFields] = React.useState<TextField[]>([]);
   const [error, setError] = React.useState("");
   const [errorWork, setErrorWork] = React.useState("");
-
+  const [errorDate, setErrorDate] = React.useState("");
   const staffs = users.filter((staff) => staff.role == 2);
 
   const handleChooseTree = (tree: TreeRes) => {
@@ -91,7 +91,13 @@ export default function AddAssignmentDialogForm({
     popupAnchor: [0, -24],
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (dl: Date) => {
+    const now = Date.now();
+    const dlTimestamp = dl.getTime();
+    if (dlTimestamp < now) {
+      setErrorDate("Dealine can not expired");
+      return;
+    }
     if (selectedTree === null) {
       setError("Please choose tree!!!");
     }
@@ -100,6 +106,7 @@ export default function AddAssignmentDialogForm({
     }
     if (selectedTree !== null && selectedUser !== "" && fields.length !== 0) {
       setErrorWork("");
+      setErrorDate("");
       const req = fields.filter((field) => field.value.trim() !== "");
       const newWorkContents: WorkContentReq[] = req.map((field) => ({
         id: null,
@@ -111,6 +118,7 @@ export default function AddAssignmentDialogForm({
         treeId: selectedTree.id,
         userId: selectedUser,
         workContent: newWorkContents,
+        deadLine: dl,
       };
 
       var res = await createAssignment(assignmentReq, token);
@@ -121,6 +129,7 @@ export default function AddAssignmentDialogForm({
         showToast(`${res.message}`, "error");
       }
       setSelectedTree(null);
+      setSelectedTreeInfo(null);
       setSelectedUser("");
       setFields([]);
       handleClose();
@@ -157,7 +166,7 @@ export default function AddAssignmentDialogForm({
   return (
     <React.Fragment>
       <Button variant="outlined" onClick={handleClickOpen}>
-        Add new assignment
+        Add new task
       </Button>
       <Dialog
         fullWidth
@@ -167,7 +176,9 @@ export default function AddAssignmentDialogForm({
           component: "form",
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            handleSubmit();
+            const formData = new FormData(event.currentTarget);
+            const deadline = new Date(formData.get("deadLine") as string);
+            handleSubmit(deadline);
           },
         }}
       >
@@ -221,7 +232,22 @@ export default function AddAssignmentDialogForm({
           >
             Select tree to add assignment
           </Button>
-
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="deadLine"
+            name="deadLine"
+            label="Set dead line"
+            type="date"
+            fullWidth
+            variant="standard"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            error={!!errorDate}
+            helperText={errorDate}
+          />
           <div className="mt-5">
             <h1 className="font-bold">List works to do:</h1>
             <p className="text-red-500">{errorWork !== "" ? errorWork : ""}</p>

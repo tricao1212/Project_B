@@ -10,8 +10,9 @@ const asideAdminItems : Aside[] = [
   { title: "Home", icon: <HomeIcon />, link: "" },
   { title: "Trees", icon: <ParkIcon />, link: "trees" },
   { title: "Users", icon: <PeopleIcon />, link: "users" },
-  { title: "Types Tree", icon: <ForestIcon />, link: "types" },
-  { title: "Assignments", icon: <AssignmentIcon />, link: "assignments" },
+  { title: "Species", icon: <ForestIcon />, link: "types" },
+  { title: "Tasks", icon: <AssignmentIcon />, link: "assignments" },
+  { title: "Tasks History", icon: <AssignmentIcon />, link: "assignHistory" },
   { title: "Map", icon: <MapIcon />, link: "map" },
 ];
 

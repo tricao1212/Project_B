@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import axios from "../config/axiosCustomize";
 import { LoginReq } from "../interfaces/Request/User/LoginReq";
+import { UserRes } from "../interfaces/Response/User/UserRes";
 
 const getAllUser = async (token: string) => {
   const response = (
@@ -12,6 +14,13 @@ const getAllUser = async (token: string) => {
 
   return response;
 };
+
+export const useAllUserData = (token : string) => {
+  return useQuery<UserRes[]>({
+    queryKey: ["users"],
+    queryFn: () => getAllUser(token).then((res) => res.data),
+  });
+}
 
 const login = async (loginData: LoginReq) => {
   const response = (await axios.post("/user/login", loginData)).data;

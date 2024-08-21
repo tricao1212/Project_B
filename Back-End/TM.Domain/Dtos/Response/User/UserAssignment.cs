@@ -13,5 +13,8 @@ namespace TM.Domain.Dtos.Response.User
         public string TreeId { get; set; } = null!;
         public List<WorkContentRes>? WorkContent { get; set; } = new List<WorkContentRes>();
         public string? CreatedBy { get; set; }
+        public DateTime DeadLine { get; set; }
+        public bool IsRequest { get; set; }
+
     }
 }

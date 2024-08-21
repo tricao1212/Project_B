@@ -151,6 +151,7 @@ namespace TM.Application.Services
 
             try
             {
+                user.Assignments.All(x => x.IsDeleted == true);
                 await _unitOfWork.UserRepo.SoftDeleteAsync(user);
                 return Success(true);
             }
@@ -192,6 +193,7 @@ namespace TM.Application.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.UserData, user.UserName),
+                new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };

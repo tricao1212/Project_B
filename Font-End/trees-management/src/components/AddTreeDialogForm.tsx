@@ -159,7 +159,7 @@ export default function AddTreeDialogForm({ trees, data }: ActionProps) {
             margin="dense"
             id="heigh"
             name="heigh"
-            label="Heigh"
+            label="Heigh (cm)"
             type="number"
             fullWidth
             variant="standard"
@@ -170,7 +170,7 @@ export default function AddTreeDialogForm({ trees, data }: ActionProps) {
             margin="dense"
             id="diameter"
             name="diameter"
-            label="Diameter"
+            label="Diameter (cm)"
             type="number"
             fullWidth
             variant="standard"

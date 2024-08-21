@@ -6,8 +6,35 @@ const getAllAssignment = async () => {
   return response;
 };
 
+const getHistory = async (token : string) => {
+  const response = (
+    await axios.get("/assignment/gethistory", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  ).data;
+  return response;
+};
+
 const getAssignmentById = async (id: string) => {
-  const response = (await axios.delete(`/assignment/getbyid/?Id=${id}`)).data;
+  const response = (await axios.post(`/assignment/getbyid/?Id=${id}`)).data;
+  return response;
+};
+
+const sendRequestConfirm = async (id: string, token: string) => {
+  const response = (
+    await axios.post(
+      `/assignment/sendrequest?Id=${id}`, 
+      {},  // Empty body
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+  ).data;
+
   return response;
 };
 
@@ -76,5 +103,7 @@ export {
   updateAssignment,
   updateStatusAssignment,
   deleteAssignment,
-  softDeleteAssignment
+  softDeleteAssignment,
+  getHistory,
+  sendRequestConfirm,
 };

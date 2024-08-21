@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { TreeRes } from "../interfaces/Response/Tree/TreeRes";
 import InfoIcon from "@mui/icons-material/Info";
-import { formatDateTime } from "../utils/formatDate";
+import { formatDateOnly, formatDateTime } from "../utils/formatDate";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { Icon } from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -35,6 +35,7 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [usernames, setUsernames] = useState<Map<string, string>>(new Map());
+  const now = Date.now();
 
   const fetchUserById = async (id: string): Promise<UserRes> => {
     const res = await getUserById(id);
@@ -72,7 +73,7 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
   return (
     <>
       <IconButton aria-label="details" onClick={() => handleClickOpen()}>
-        <InfoIcon />
+        <InfoIcon color="success"/>
       </IconButton>
       <Dialog open={open} onClose={handleClose} fullWidth>
         <DialogTitle
@@ -158,9 +159,9 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
               <div className="relative w-full" style={{ height: "300px" }}>
                 <MapContainer
                   center={[tree.lat, tree.lng]}
-                  zoom={17}
+                  zoom={16}
                   className="absolute top-0 left-0 w-full h-full"
-                  minZoom={16}
+                  minZoom={15}
                   maxZoom={18}
                   zoomControl={true}
                   scrollWheelZoom={true}
@@ -174,7 +175,7 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
                   </Marker>
                 </MapContainer>
               </div>
-              {assignments && assignments.length > 0 && (
+              {assignments.length > 0 && (
                 <Grid item xs={12}>
                   <Typography
                     variant="h6"
@@ -196,7 +197,7 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
                                 variant="subtitle1"
                                 className="font-semibold"
                               >
-                                Staff Name:{" "}
+                                <span className="font-bold">Staff name: </span>
                                 {usernames.get(assignment.userId) ||
                                   "Loading..."}
                               </Typography>
@@ -204,7 +205,28 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
                                 variant="subtitle1"
                                 className="font-semibold"
                               >
-                                Created By: {assignment.createdBy}
+                                <span className="font-bold">Created by: </span>
+                                {assignment.createdBy}
+                              </Typography>
+                              <Typography
+                                variant="subtitle1"
+                                className="font-semibold"
+                              >
+                                <span className="font-bold">Due date: </span>
+                                {new Date(assignment.deadLine).getTime() <
+                                now ? (
+                                  <span className="text-red-500">
+                                    {formatDateOnly(
+                                      new Date(assignment.deadLine)
+                                    )}
+                                  </span>
+                                ) : (
+                                  <span className="text-green-500">
+                                    {formatDateOnly(
+                                      new Date(assignment.deadLine)
+                                    )}
+                                  </span>
+                                )}
                               </Typography>
                             </div>
                           }
@@ -214,17 +236,28 @@ const TreeDetails = ({ tree, assignments }: TreeDetailsPopupProps) => {
                                 <Typography
                                   component="span"
                                   variant="body2"
-                                  className="block mt-1 font-semibold"
+                                  className="block mt-1 font-bold"
                                 >
-                                  Work Content:
+                                  Works Content:
                                 </Typography>
                                 {assignment.workContent.map(
                                   (content, index) => (
-                                    <div key={content.id} className="pl-4 flex justify-between">
+                                    <div
+                                      key={content.id}
+                                      className="pl-4 flex justify-between"
+                                    >
                                       <Typography variant="body2">
                                         {`${index + 1}. ${content.content}`}
                                       </Typography>
-                                      {getWorkStatus(content.status)}
+                                      {content.status === 0 ? (
+                                        <span className="text-blue-500">
+                                          {getWorkStatus(content.status)}
+                                        </span>
+                                      ) : (
+                                        <span className="text-green-400">
+                                          {getWorkStatus(content.status)}
+                                        </span>
+                                      )}
                                     </div>
                                   )
                                 )}

@@ -21,7 +21,7 @@ const Dashboard = () => {
         <DashboardSidebar asideItems={asideStaffItems} />
       )}
       <main className="w-full overflow-y-auto bg-[#F4FDFA]">
-        <header className="mx-5 border-b-2 sticky top-0 z-50 bg-white p-5">
+        <header className="mx-5 border-b-2 sticky top-0 bg-white p-5 z-[1002]">
           <div className="flex flex-row justify-between">
             <div className="flex items-center">
               <a href="/">

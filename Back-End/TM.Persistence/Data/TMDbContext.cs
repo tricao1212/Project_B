@@ -91,7 +91,7 @@ namespace TM.Persistence.Data
             {
                 var auditableEntity = (BaseEntity)entry.Entity;
                 var currentTime = DateTime.Now;
-                var currentUser = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.UserData)?.Value ?? "System";
+                var currentUser = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value ?? "System";
                 if (entry.State == EntityState.Added)
                 {
                     auditableEntity.CreatedAt = currentTime;

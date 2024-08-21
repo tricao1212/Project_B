@@ -33,6 +33,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { useToast } from "./Toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Loading from "./Loading";
 
 interface ActionProps {
   tree: TreeRes;
@@ -128,9 +129,9 @@ export default function EditTreeDialogForm({
     setLat(tree.lat.toString());
     setLng(tree.lng.toString());
     setPreview(tree.image);
-  }, [tree]);
+  }, [tree,typeTreeOptions]);
 
-  return (
+  const render = (
     <React.Fragment>
       <IconButton aria-label="edit" onClick={() => handleClickOpen()}>
         <EditIcon color="primary" />
@@ -215,7 +216,7 @@ export default function EditTreeDialogForm({
             defaultValue={tree.heigh}
             id="heigh"
             name="heigh"
-            label="Heigh"
+            label="Height (cm)"
             type="number"
             fullWidth
             variant="standard"
@@ -227,7 +228,7 @@ export default function EditTreeDialogForm({
             margin="dense"
             id="diameter"
             name="diameter"
-            label="Diameter"
+            label="Diameter (cm)"
             type="number"
             fullWidth
             variant="standard"
@@ -356,4 +357,10 @@ export default function EditTreeDialogForm({
       </Dialog>
     </React.Fragment>
   );
+
+  return ( 
+    <>
+    {typeTreeOptions ? render : <Loading/>}
+    </>
+  )
 }

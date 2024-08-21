@@ -13,7 +13,7 @@ namespace TM.Persistence.Repositories
 
         public override async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _dbSet.Include(x => x.Assignments).ThenInclude(w => w.WorkContent.Where(w => w.IsDeleted == false))
+            return await _dbSet.Include(x => x.Assignments.Where(a => a.IsDeleted == false)).ThenInclude(w => w.WorkContent.Where(w => w.IsDeleted == false))
                                .AsNoTracking()
                                .ToListAsync();
         }

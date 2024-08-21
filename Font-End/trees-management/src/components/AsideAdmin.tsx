@@ -101,13 +101,13 @@ const DashboardSidebar = ({asideItems} : AsideComponentProps) => {
                   className={activeFunct(items.link)}
                 >
                   {items.icon}
-                  <span
+                  {/* <span
                     className={`overflow-hidden ease-in-out duration-500 ${
                       expanded ? "ml-2" : "ml-0 w-0"
                     }`}
                   >
                     {items.title}
-                  </span>
+                  </span> */}
                 </Link>
               </Tooltip>
             )

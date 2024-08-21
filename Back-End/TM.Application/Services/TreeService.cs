@@ -172,6 +172,7 @@ namespace TM.Application.Services
 
             try
             {
+                tree.Assignments.All(x => x.IsDeleted == true);
                 await _unitOfWork.TreeRepo.SoftDeleteAsync(tree);
                 return Success(true);
             }

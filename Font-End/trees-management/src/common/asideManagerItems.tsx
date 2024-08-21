@@ -7,10 +7,11 @@ import { Aside } from "../interfaces/Aside";
 
 const asideManagerItems : Aside[] = [
   { title: "Home", icon: <HomeIcon />, link: "manager" },
-  { title: "Trees", icon: <ParkIcon />, link: "trees" },
-  { title: "Staffs", icon: <PeopleIcon />, link: "staffs" },
-  { title: "Assignments", icon: <AssignmentIcon />, link: "assignmentsManager" },
-  { title: "Map", icon: <MapIcon />, link: "map" },
+  { title: "Trees", icon: <ParkIcon />, link: "treesManager" },
+  { title: "Staffs", icon: <PeopleIcon />, link: "listStaffs" },
+  { title: "Tasks", icon: <AssignmentIcon />, link: "assignmentsManager" },
+  { title: "Tasks History", icon: <AssignmentIcon />, link: "assignHistory" },
+  { title: "Map", icon: <MapIcon />, link: "mapManager" },
 ];
 
 export { asideManagerItems };

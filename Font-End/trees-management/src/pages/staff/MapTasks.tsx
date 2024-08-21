@@ -14,10 +14,8 @@ const MapTasks = () => {
     const trees = res as TreeRes[];
     if (user) {
       const filteredTrees = trees.filter((tree: TreeRes) => {
-        return (
-          tree.assignments?.some(
-            (assignment) => assignment.userId === user.id
-          ) ?? false
+        return tree.assignments?.some(
+          (assignment) => assignment.userId === user.id
         );
       });
       return filteredTrees;
@@ -44,6 +42,7 @@ const MapTasks = () => {
     data: treesTask = [],
     isLoading: taskLoading,
     isError: taskError,
+    refetch,
   } = useQuery<TreeRes[]>({
     queryKey: ["treesTask"],
     queryFn: () => fetchTreeTask(),
@@ -64,6 +63,7 @@ const MapTasks = () => {
       <TreeMapStaff
         initialTrees={trees}
         taskTrees={treesTask}
+        handleFetch={refetch}
         areaCenter={[11.052829, 106.666128]} // Center of EIU
         areaSize={[0.01, 0.01]} // Approximately 11km x 11km at this latitude
         minZoom={17}

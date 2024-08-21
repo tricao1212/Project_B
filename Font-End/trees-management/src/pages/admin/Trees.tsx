@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TreeRes } from "../../interfaces/Response/Tree/TreeRes";
 import { TypeTreeRes } from "../../interfaces/Response/TypeTree/TypeTreeRes";
-import { deleteTree, getAllTree } from "../../services/TreeApi";
+import { getAllTree, softDeleteTree } from "../../services/TreeApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { getAllTypeTree } from "../../services/TypeTreeApi";
@@ -9,6 +9,11 @@ import AddTreeDialogForm from "../../components/AddTreeDialogForm";
 import Loading from "../../components/Loading";
 import { ColTable } from "../../interfaces/ColTable";
 import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -30,12 +35,17 @@ const Trees = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const { showToast } = useToast();
+  const [selectedType, setSelectedType] = useState<string>("");
+
+  const handleTypeChange = (event: SelectChangeEvent<string>) => {
+    setSelectedType(event.target.value as string);
+  };
 
   const columns: ColTable[] = [
     { title: "Image", map: "image" },
     { title: "Name", map: "name" },
     { title: "Tree Code", map: "treeCode" },
-    { title: "Type", map: "typeTree" },
+    { title: "Specie", map: "typeTree" },
     { title: "Height", map: "heigh" },
     { title: "Plant Year", map: "plantYear" },
   ];
@@ -60,7 +70,7 @@ const Trees = () => {
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: async (treeId: string) => await deleteTree(treeId, token),
+    mutationFn: async (treeId: string) => await softDeleteTree(treeId, token),
     onSuccess: async (data) => {
       if (data.isSuccess) {
         await queryClient.invalidateQueries({ queryKey: ["trees"] });
@@ -83,13 +93,12 @@ const Trees = () => {
   };
 
   const filteredData = trees.filter((row) => {
-    return columns.some((column) => {
-      const value = row[column.map as keyof TreeRes];
-      const cleanValue = value
-        ? removeDiacritics(value.toString()).toLowerCase()
-        : "";
-      return value ? cleanValue.includes(searchTerm.toLowerCase()) : false;
-    });
+    const searchValue = removeDiacritics(
+      `${row.name} ${row.treeCode} ${row.age} ${row.heigh} ${row.diameter} ${row.plantYear} ${row.typeTree} `
+    ).toLowerCase();
+    const matchesSearchTerm = searchValue.includes(searchTerm);
+    const type = selectedType === "" ? true : selectedType === row.typeTree;
+    return matchesSearchTerm && type;
   });
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -110,19 +119,34 @@ const Trees = () => {
         <AddTreeDialogForm trees={trees} data={types} />
       </div>
       <div>
-        <div className="mx-auto mb-4">
+        <div className="mb-4 space-y-4 sm:space-y-0 sm:flex sm:space-x-5">
           <TextField
             label="Search"
             variant="outlined"
             value={searchTerm}
             onChange={handleSearch}
-            fullWidth
           />
+          <FormControl sx={{ width: 300 }}>
+            <InputLabel>Search by species</InputLabel>
+            <Select
+              value={selectedType}
+              onChange={handleTypeChange}
+              label="Selecet type tree"
+              variant="outlined"
+            >
+              <MenuItem value="">-</MenuItem>
+              {types.map((type) => (
+                <MenuItem key={type.id} value={type.name}>
+                  {type.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <TableContainer
           sx={{
-            maxHeight: 500,
-            border: "1px solid grey",
+            maxHeight: "500px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             borderRadius: "10px",
           }}
         >
@@ -136,7 +160,7 @@ const Trees = () => {
                 {columns.map((column) => (
                   <TableCell
                     key={column.title}
-                    style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                    style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                     className="uppercase"
                     align="center"
                   >
@@ -144,7 +168,7 @@ const Trees = () => {
                   </TableCell>
                 ))}
                 <TableCell
-                  style={{ backgroundColor: "#F3F4F6", fontWeight: "bold" }}
+                  style={{ backgroundColor: "#BBF7D0", fontWeight: "bold" }}
                   align="center"
                   className="uppercase"
                 >
@@ -179,7 +203,7 @@ const Trees = () => {
                                       : ""
                                   }
                                   alt={`${value} image`}
-                                  className="w-36 h-20"
+                                  className="w-36 h-20 rounded"
                                 />
                               ) : value ? (
                                 value.toString()
@@ -193,7 +217,7 @@ const Trees = () => {
                       <TableCell align="center">
                         <TreeDetails
                           tree={row}
-                          assignments={row.assignments ?? []}
+                          assignments={[]}
                         />
                         <EditTreeDialogForm
                           tree={row}

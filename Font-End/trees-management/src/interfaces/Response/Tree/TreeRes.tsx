@@ -17,7 +17,7 @@ interface TreeRes {
     updatedAt: string;
     createdBy: string;
     updatedBy: string;
-    assignments?: TreeAssignment[];
+    assignments: TreeAssignment[];
   }
   
   export type { TreeRes };
