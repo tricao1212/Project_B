@@ -154,7 +154,7 @@ const AssignmentsManager = () => {
   const render = (
     <div className="container mx-auto">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Assignments History</h1>
+        <h1 className="text-2xl font-bold">Tasks History</h1>
         <AddAssignmentDialogForm
           trees={trees}
           users={users}

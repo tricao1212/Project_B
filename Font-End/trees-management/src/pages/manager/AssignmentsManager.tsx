@@ -235,7 +235,7 @@ const AssignmentsManager = () => {
   const render = (
     <div className="container mx-auto">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Assignments Management</h1>
+        <h1 className="text-2xl font-bold">Tasks Management</h1>
         <AddAssignmentDialogForm
           trees={trees}
           users={users}
@@ -463,12 +463,14 @@ const AssignmentsManager = () => {
                                     {formatDateOnly(value as Date)}
                                   </span>
                                 ) : column.map === "progress" ? (
-                                  value + "%"
+                                  <span className="font-bold">
+                                    {value + "%"}
+                                  </span>
                                 ) : (
                                   value.toString()
                                 )
                               ) : column.map === "progress" ? (
-                                "0%"
+                                <span className="font-bold">0%</span>
                               ) : (
                                 "-"
                               )}

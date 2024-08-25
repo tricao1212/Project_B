@@ -462,11 +462,11 @@ const Assignments = () => {
                                   >
                                     {formatDateOnly(value as Date)}
                                   </span>
-                                ) : column.map === "progress" ? value + "%" : (
+                                ) : column.map === "progress" ? <span className="font-bold">{value + "%"}</span> : (
                                   value.toString()
                                 )
                               ) : column.map === "progress" ? (
-                                "0%"
+                                <span className="font-bold">0%</span>
                               ) : (
                                 "-"
                               )}
