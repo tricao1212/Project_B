@@ -2,8 +2,6 @@
 
 [Uploading CSE 311_Tree Management Appication_Cao Minh Tri_Tran Van Tai.pdf…]()
 
-![CSE 311_Tree Management Application_Cao Minh Tri_Tran Van Tai-images-1](https://github.com/user-attachments/assets/7968d22d-f400-4212-b3c8-62ee873056a6)  
-![CSE 311_Tree Management Application_Cao Minh Tri_Tran Van Tai-images-2](https://github.com/user-attachments/assets/257bc458-eedc-4e31-903d-c16fb4c05c05)  
 ![CSE 311_Tree Management Application_Cao Minh Tri_Tran Van Tai-images-3](https://github.com/user-attachments/assets/dc65d590-4a2b-411c-a5b5-a31762e02bfe)  
 ![CSE 311_Tree Management Application_Cao Minh Tri_Tran Van Tai-images-4](https://github.com/user-attachments/assets/72fd1846-cd06-4c20-8347-6f3083a30488)  
 ![CSE 311_Tree Management Application_Cao Minh Tri_Tran Van Tai-images-5](https://github.com/user-attachments/assets/af81e6fc-e8f1-4609-aa64-45c0be0dd57e)  
